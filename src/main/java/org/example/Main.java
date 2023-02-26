@@ -28,8 +28,10 @@ public class Main {
     private final JTextField fieldReg = new JTextField(props.properties.getProperty("fieldReg"));
     private final JTextArea fieldReg2 = new JTextArea(props.properties.getProperty("fieldReg2"));
     private final JTextField fieldCmd = new JTextField(props.properties.getProperty("fieldCmd"));
-    private final JCheckBox boxRename = new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxRename")));
-    private final JCheckBox boxCopy = new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxCopy")));
+    private final JCheckBox boxRename =
+            new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxRename")));
+    private final JCheckBox boxCopy =
+            new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxCopy")));
     private final JTextArea area = new JTextArea("");
     private volatile boolean isRunning = false;
     private Method renameMethod;
@@ -49,34 +51,37 @@ public class Main {
         frame.add(new JScrollPane(area));
         frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                isRunning = false;
-            }
-        });
+        frame.addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        isRunning = false;
+                    }
+                });
         frame.setVisible(true);
 
-        button1.addActionListener(e -> {
-            if (isRunning) {
-                isRunning = false;
-                button1.setText("Start!");
-            } else {
-                isRunning = true;
-                button1.setText("Stop");
-                new Thread(this::startRun).start();
-            }
-        });
+        button1.addActionListener(
+                e -> {
+                    if (isRunning) {
+                        isRunning = false;
+                        button1.setText("Start!");
+                    } else {
+                        isRunning = true;
+                        button1.setText("Stop");
+                        new Thread(this::startRun).start();
+                    }
+                });
         button2.addActionListener(e -> showSettings(frame));
 
         showSettings(frame);
     }
 
     private void append(String s) throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            area.append(s + "\n");
-            area.setCaretPosition(area.getText().length());
-        });
+        SwingUtilities.invokeAndWait(
+                () -> {
+                    area.append(s + "\n");
+                    area.setCaretPosition(area.getText().length());
+                });
     }
 
     @SuppressWarnings("all")
@@ -84,10 +89,16 @@ public class Main {
         try {
             while (isRunning) {
                 Pattern pat1 = Pattern.compile(fieldReg.getText());
-                String data = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+                String data =
+                        (String)
+                                Toolkit.getDefaultToolkit()
+                                        .getSystemClipboard()
+                                        .getData(DataFlavor.stringFlavor);
                 if (data != null && data.matches(pat1.pattern())) {
                     StringSelection dummyStr = new StringSelection("dummy text");
-                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(dummyStr, dummyStr);
+                    Toolkit.getDefaultToolkit()
+                            .getSystemClipboard()
+                            .setContents(dummyStr, dummyStr);
                     Matcher mat1 = pat1.matcher(data);
                     if (mat1.find()) {
                         final String video_id = mat1.group(1);
@@ -103,7 +114,11 @@ public class Main {
                 Thread.sleep(3000);
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "An exception occurred!\n\n" + e, "Exception e", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "An exception occurred!\n\n" + e,
+                    "Exception e",
+                    JOptionPane.WARNING_MESSAGE);
             System.exit(0);
         }
     }
@@ -130,7 +145,7 @@ public class Main {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         append("compiler.run = " + compiler.run(null, null, null, sourceFile.getPath()));
         // Load and instantiate compiled class.
-        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
+        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {root.toURI().toURL()});
         Class<?> cls = Class.forName("AdvancedRenamer", true, classLoader);
         renameMethod = cls.getDeclaredMethod("rename", String.class);
         //  Object instance = cls.getDeclaredConstructor().newInstance();
@@ -152,7 +167,10 @@ public class Main {
                 if (!new File(fieldSrc.getText() + prefix + ".mp3").exists()) {
                     String a = f.getAbsolutePath();
                     String b = fieldSrc.getText() + prefix + ".mp3";
-                    append(String.format("Rename %s to %s ... %b", a, b, new File(a).renameTo(new File(b))));
+                    append(
+                            String.format(
+                                    "Rename %s to %s ... %b",
+                                    a, b, new File(a).renameTo(new File(b))));
                 }
             }
         }
@@ -184,26 +202,38 @@ public class Main {
 
     private void showSettings(JFrame frame) {
         final JDialog dialog = new JDialog(frame, "Customization", true);
-        dialog.getContentPane().add(PanelMatic.begin()
-                .addHeader(PanelBuilder.HeaderLevel.H3, "Customization")
-                .add("Source folder:", fieldSrc)
-                .add("To copy folder:", fieldDst)
-                .add("RegEx (do not change):", fieldReg)
-                .add("Replace RegEx:", fieldReg2)
-                .add("CLI Command (do not change):", fieldCmd)
-                .add("Should rename?", boxRename)
-                .add("Should copy/sync?", boxCopy)
-                .get());
+        dialog.getContentPane()
+                .add(
+                        PanelMatic.begin()
+                                .addHeader(PanelBuilder.HeaderLevel.H3, "Customization")
+                                .add("Source folder:", fieldSrc)
+                                .add("To copy folder:", fieldDst)
+                                .add("RegEx (do not change):", fieldReg)
+                                .add("Replace RegEx:", fieldReg2)
+                                .add("CLI Command (do not change):", fieldCmd)
+                                .add("Should rename?", boxRename)
+                                .add("Should copy/sync?", boxCopy)
+                                .get());
         dialog.pack();
         dialog.setSize(dialog.getWidth() + 50, dialog.getHeight());
-        dialog.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                fieldSrc.setText(new File(fieldSrc.getText()).getAbsolutePath() + File.separator);
-                fieldDst.setText(new File(fieldDst.getText()).getAbsolutePath() + File.separator);
-                props.storeProps(fieldSrc.getText(), fieldDst.getText(), fieldReg.getText(), fieldReg2.getText(), fieldCmd.getText(), boxRename.isSelected(), boxCopy.isSelected());
-            }
-        });
+        dialog.addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        fieldSrc.setText(
+                                new File(fieldSrc.getText()).getAbsolutePath() + File.separator);
+                        fieldDst.setText(
+                                new File(fieldDst.getText()).getAbsolutePath() + File.separator);
+                        props.storeProps(
+                                fieldSrc.getText(),
+                                fieldDst.getText(),
+                                fieldReg.getText(),
+                                fieldReg2.getText(),
+                                fieldCmd.getText(),
+                                boxRename.isSelected(),
+                                boxCopy.isSelected());
+                    }
+                });
         dialog.setVisible(true);
     }
 

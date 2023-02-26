@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.util.Properties;
 
 public class Props {
@@ -23,10 +22,13 @@ public class Props {
                 properties.put("fieldDst", "D:\\yt-dlp\\");
             }
             if (!properties.containsKey("fieldReg")) {
-                properties.put("fieldReg", "^https://www\\.youtube\\.com/watch\\?v=([^?&]{10,12}).*$");
+                properties.put(
+                        "fieldReg", "^https://www\\.youtube\\.com/watch\\?v=([^?&]{10,12}).*$");
             }
             if (!properties.containsKey("fieldReg2")) {
-                properties.put("fieldReg2", """
+                properties.put(
+                        "fieldReg2",
+                        """
                         public class AdvancedRenamer {
                             public static String rename(String prefix) {
                                 prefix = prefix.replaceAll("&", "n");
@@ -41,11 +43,12 @@ public class Props {
                                 prefix = prefix.trim().toLowerCase(java.util.Locale.ROOT);
                                 return prefix;
                             }
-                        }"""
-                );
+                        }""");
             }
             if (!properties.containsKey("fieldCmd")) {
-                properties.put("fieldCmd", "powershell.exe \"cd '%1$s' ; yt-dlp.exe -f bestaudio -x --audio-format mp3 --audio-quality 320K -- %2$s\"");
+                properties.put(
+                        "fieldCmd",
+                        "powershell.exe \"cd '%1$s' ; yt-dlp.exe -f bestaudio -x --audio-format mp3 --audio-quality 320K -- %2$s\"");
             }
             if (!properties.containsKey("boxRename")) {
                 properties.put("boxRename", "true");
@@ -54,12 +57,23 @@ public class Props {
                 properties.put("boxCopy", "true");
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "An exception occurred!\n\n" + e, "Exception e", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "An exception occurred!\n\n" + e,
+                    "Exception e",
+                    JOptionPane.WARNING_MESSAGE);
             System.exit(0);
         }
     }
 
-    public void storeProps(String fieldSrc, String fieldDst, String fieldReg, String fieldReg2, String fieldCmd, boolean boxRename, boolean boxCopy) {
+    public void storeProps(
+            String fieldSrc,
+            String fieldDst,
+            String fieldReg,
+            String fieldReg2,
+            String fieldCmd,
+            boolean boxRename,
+            boolean boxCopy) {
         try {
             properties.put("fieldSrc", fieldSrc);
             properties.put("fieldDst", fieldDst);
@@ -72,7 +86,11 @@ public class Props {
                 properties.store(fos, "Properties for MP3Watcher");
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "An exception occurred!\n\n" + e, "Exception e", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "An exception occurred!\n\n" + e,
+                    "Exception e",
+                    JOptionPane.WARNING_MESSAGE);
             System.exit(0);
         }
     }
