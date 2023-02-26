@@ -21,6 +21,7 @@ jobs:
           cache: maven
       - uses: axel-op/googlejavaformat-action@v3
         with:
+          version: 1.16.0
           args: "--aosp --skip-sorting-imports --skip-reflowing-long-strings --skip-javadoc-formatting --replace"
       - name: Build with Maven
         run: mvn -B clean compile assembly:single --file pom.xml
