@@ -11,3 +11,7 @@ A MP3 wrapper for yt-dlp written in Java for Windows.
 ### How to contribute?
 
 - Just open a new Issue.
+
+### Install:
+
+- Check out the newest build in [target/](target) folder.
