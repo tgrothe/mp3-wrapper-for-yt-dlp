@@ -33,10 +33,10 @@ public class Props {
                             public static String rename(String prefix) {
                                 prefix = prefix.replaceAll("&", "n");
                                 prefix = prefix.replaceAll("_", " ");
-                                if (prefix.matches("^.+ \\\\[.{6,11}]$")) {
-                                    prefix = prefix.replaceAll(" \\\\[.{6,11}]$", "");
-                                } else if (prefix.matches("^.+ .{6,11} $")) {
-                                    prefix = prefix.replaceAll(" .{6,11} $", "");
+                                if (prefix.matches("^.+ \\\\[.{10,12}]$")) {
+                                    prefix = prefix.replaceAll(" \\\\[.{10,12}]$", "");
+                                } else if (prefix.matches("^.+ .{10,12} $")) {
+                                    prefix = prefix.replaceAll(" .{10,12} $", "");
                                 }
                                 prefix = prefix.replaceAll("[^-()\\\\w]+", " ");
                                 prefix = prefix.replaceAll(" {2,}", " ");
