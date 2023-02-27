@@ -38,7 +38,7 @@ public class Props {
                                 } else if (prefix.matches("^.+ .{6,11} $")) {
                                     prefix = prefix.replaceAll(" .{6,11} $", "");
                                 }
-                                prefix = prefix.replaceAll("[^-()\\\\wäöüß]+", " ");
+                                prefix = prefix.replaceAll("[^-()\\\\w]+", " ");
                                 prefix = prefix.replaceAll(" {2,}", " ");
                                 prefix = prefix.trim().toLowerCase(java.util.Locale.ROOT);
                                 return prefix;
