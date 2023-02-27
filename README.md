@@ -14,6 +14,7 @@ A MP3 wrapper for yt-dlp written in Java for Windows.
 
 ### Install:
 
+- Build status: [![Java CI with Maven](https://github.com/tgrothe/mp3-wrapper-for-yt-dlp/actions/workflows/maven.yml/badge.svg)](https://github.com/tgrothe/mp3-wrapper-for-yt-dlp/actions/workflows/maven.yml)
 - Check out the newest build in [target/](target) folder.
 
 ### Demo:
