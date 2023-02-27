@@ -23,12 +23,18 @@ jobs:
         with:
           version: 1.16.0
           args: "--aosp --skip-sorting-imports --skip-reflowing-long-strings --skip-javadoc-formatting --replace"
+      - name: Set git credentials
+        run: |
+          git config user.email "tgrothe@users.noreply.github.com"
+          git config user.name "tgrothe"
+      - name: Del previous builds
+        run: |
+          rm rm target/mp3-wrapper-for-yt-dlp-1.0.*.jar -f
+          git commit -m "Automatically del previous builds"
       - name: Build with Maven
         run: mvn -B clean compile assembly:single --file pom.xml
       - name: Upload
         run: |
-          git config user.email "tgrothe@users.noreply.github.com"
-          git config user.name "tgrothe"
           git add target/mp3-wrapper-for-yt-dlp-1.0.*.jar -f
           git commit -m "Automatically build upload"
           git push
