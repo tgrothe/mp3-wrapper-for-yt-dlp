@@ -48,7 +48,7 @@ public class Props {
             if (!properties.containsKey("fieldCmd")) {
                 properties.put(
                         "fieldCmd",
-                        "cmd /c start powershell.exe -Wait -Command \"cd '%1$s' ; yt-dlp.exe -f bestaudio -x --audio-format mp3 --audio-quality 320K -- %2$s\"");
+                        "cmd /c start /wait powershell.exe -Command \"cd '%1$s' ; yt-dlp.exe -f bestaudio -x --audio-format mp3 --audio-quality 320K -- %2$s\"");
             }
             if (!properties.containsKey("boxRename")) {
                 properties.put("boxRename", "true");
