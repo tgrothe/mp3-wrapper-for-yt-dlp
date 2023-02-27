@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class Props {
     public final Properties properties = new Properties();
-    private final File pf = new File("MP3WatcherProps.txt";
+    private final File pf = new File("MP3WatcherProps.txt");
 
     public Props() {
         try {
