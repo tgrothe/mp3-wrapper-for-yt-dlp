@@ -39,6 +39,7 @@ public class Main {
     public Main() {
         fieldReg2.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        area.setLineWrap(true);
 
         JButton button1 = new JButton("Start!");
         JButton button2 = new JButton("Settings");
