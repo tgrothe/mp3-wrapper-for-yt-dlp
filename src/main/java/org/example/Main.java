@@ -74,16 +74,18 @@ public class Main {
                         new Thread(this::startRun).start();
                     }
                 });
-        button2.addActionListener(e -> {
-            isRunning = false;
-            button1.setText("Start!");
-            showBulk(frame);
-        });
-        button3.addActionListener(e -> {
-            isRunning = false;
-            button1.setText("Start!");
-            showSettings(frame);
-        });
+        button2.addActionListener(
+                e -> {
+                    isRunning = false;
+                    button1.setText("Start!");
+                    showBulk(frame);
+                });
+        button3.addActionListener(
+                e -> {
+                    isRunning = false;
+                    button1.setText("Start!");
+                    showSettings(frame);
+                });
 
         showSettings(frame);
     }
@@ -161,7 +163,7 @@ public class Main {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         append("compiler.run = " + compiler.run(null, null, null, sourceFile.getPath()));
         // Load and instantiate compiled class.
-        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
+        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {root.toURI().toURL()});
         Class<?> cls = Class.forName("AdvancedRenamer", true, classLoader);
         renameMethod = cls.getDeclaredMethod("rename", String.class);
         //  Object instance = cls.getDeclaredConstructor().newInstance();
@@ -223,7 +225,8 @@ public class Main {
         dialog.getContentPane()
                 .add(
                         PanelMatic.begin()
-                                .addHeader(PanelBuilder.HeaderLevel.H3, "Add one URL per line here...")
+                                .addHeader(
+                                        PanelBuilder.HeaderLevel.H3, "Add one URL per line here...")
                                 .add("URLs:", urls)
                                 .get());
         dialog.pack();
@@ -232,31 +235,34 @@ public class Main {
                 new WindowAdapter() {
                     @Override
                     public void windowClosing(WindowEvent e) {
-                        new Thread(() -> {
-                            try {
-                                Pattern pat1 = Pattern.compile(fieldReg.getText());
-                                String[] lines = urls.getText().split("\n");
-                                for (String l : lines) {
-                                    if (l != null && !l.isBlank() && l.matches(pat1.pattern())) {
-                                        Matcher mat1 = pat1.matcher(l);
-                                        if (mat1.find()) {
-                                            final String video_id = mat1.group(1);
-                                            startVideoId(video_id);
-                                        }
-                                    }
-                                }
-                            } catch (Exception ex) {
-                                JOptionPane.showMessageDialog(
-                                        null,
-                                        "An exception occurred!\n\n" + ex,
-                                        "Exception e",
-                                        JOptionPane.WARNING_MESSAGE);
-                                System.exit(0);
-                            }
-                        }).start();
+                        new Thread(
+                                        () -> {
+                                            try {
+                                                Pattern pat1 = Pattern.compile(fieldReg.getText());
+                                                String[] lines = urls.getText().split("\n");
+                                                for (String l : lines) {
+                                                    if (l != null
+                                                            && !l.isBlank()
+                                                            && l.matches(pat1.pattern())) {
+                                                        Matcher mat1 = pat1.matcher(l);
+                                                        if (mat1.find()) {
+                                                            final String video_id = mat1.group(1);
+                                                            startVideoId(video_id);
+                                                        }
+                                                    }
+                                                }
+                                            } catch (Exception ex) {
+                                                JOptionPane.showMessageDialog(
+                                                        null,
+                                                        "An exception occurred!\n\n" + ex,
+                                                        "Exception e",
+                                                        JOptionPane.WARNING_MESSAGE);
+                                                System.exit(0);
+                                            }
+                                        })
+                                .start();
                     }
-                }
-        );
+                });
         dialog.setVisible(true);
     }
 
