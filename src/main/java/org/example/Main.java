@@ -32,7 +32,7 @@ public class Main {
             new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxRename")));
     private final JCheckBox boxCopy =
             new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxCopy")));
-    private final JTextArea area = new JTextArea("");
+    private final JTextArea area = new JTextArea("Copy your YouTube URL to clipboard...\n\n");
     private volatile boolean isRunning = false;
     private Method renameMethod;
 
@@ -42,10 +42,12 @@ public class Main {
         area.setLineWrap(true);
 
         JButton button1 = new JButton("Start!");
-        JButton button2 = new JButton("Settings");
+        JButton button2 = new JButton("Bulk processing");
+        JButton button3 = new JButton("Settings");
         JPanel panel = new JPanel(new FlowLayout());
         panel.add(button1);
         panel.add(button2);
+        panel.add(button3);
 
         JFrame frame = new JFrame("Download, rename, copy/sync");
         frame.add(panel, BorderLayout.NORTH);
@@ -72,7 +74,16 @@ public class Main {
                         new Thread(this::startRun).start();
                     }
                 });
-        button2.addActionListener(e -> showSettings(frame));
+        button2.addActionListener(e -> {
+            isRunning = false;
+            button1.setText("Start!");
+            showBulk(frame);
+        });
+        button3.addActionListener(e -> {
+            isRunning = false;
+            button1.setText("Start!");
+            showSettings(frame);
+        });
 
         showSettings(frame);
     }
@@ -103,12 +114,7 @@ public class Main {
                     Matcher mat1 = pat1.matcher(data);
                     if (mat1.find()) {
                         final String video_id = mat1.group(1);
-                        append("Found video id " + video_id);
-                        download(video_id);
-                        compileRenamer();
-                        renameFiles();
-                        copyFiles();
-                        append("Finish video id " + video_id);
+                        startVideoId(video_id);
                     }
                 }
 
@@ -122,6 +128,15 @@ public class Main {
                     JOptionPane.WARNING_MESSAGE);
             System.exit(0);
         }
+    }
+
+    private void startVideoId(final String video_id) throws Exception {
+        append("Found video id " + video_id);
+        download(video_id);
+        compileRenamer();
+        renameFiles();
+        copyFiles();
+        append("Finish video id " + video_id);
     }
 
     private void download(String video_id) throws Exception {
@@ -146,7 +161,7 @@ public class Main {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         append("compiler.run = " + compiler.run(null, null, null, sourceFile.getPath()));
         // Load and instantiate compiled class.
-        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {root.toURI().toURL()});
+        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
         Class<?> cls = Class.forName("AdvancedRenamer", true, classLoader);
         renameMethod = cls.getDeclaredMethod("rename", String.class);
         //  Object instance = cls.getDeclaredConstructor().newInstance();
@@ -199,6 +214,50 @@ public class Main {
             }
         }
         append("Finish copyFiles()");
+    }
+
+    private void showBulk(JFrame frame) {
+        final JTextArea urls = new JTextArea();
+        urls.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        final JDialog dialog = new JDialog(frame, "Bulk processing", true);
+        dialog.getContentPane()
+                .add(
+                        PanelMatic.begin()
+                                .addHeader(PanelBuilder.HeaderLevel.H3, "Add one URL per line here...")
+                                .add("URLs:", urls)
+                                .get());
+        dialog.pack();
+        dialog.setSize(600, 600);
+        dialog.addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        new Thread(() -> {
+                            try {
+                                Pattern pat1 = Pattern.compile(fieldReg.getText());
+                                String[] lines = urls.getText().split("\n");
+                                for (String l : lines) {
+                                    if (l != null && !l.isBlank() && l.matches(pat1.pattern())) {
+                                        Matcher mat1 = pat1.matcher(l);
+                                        if (mat1.find()) {
+                                            final String video_id = mat1.group(1);
+                                            startVideoId(video_id);
+                                        }
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(
+                                        null,
+                                        "An exception occurred!\n\n" + ex,
+                                        "Exception e",
+                                        JOptionPane.WARNING_MESSAGE);
+                                System.exit(0);
+                            }
+                        }).start();
+                    }
+                }
+        );
+        dialog.setVisible(true);
     }
 
     private void showSettings(JFrame frame) {
