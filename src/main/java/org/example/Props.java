@@ -67,13 +67,13 @@ public class Props {
     }
 
     public void storeProps(
-            String fieldSrc,
-            String fieldDst,
-            String fieldReg,
-            String fieldReg2,
-            String fieldCmd,
-            boolean boxRename,
-            boolean boxCopy) {
+            final String fieldSrc,
+            final String fieldDst,
+            final String fieldReg,
+            final String fieldReg2,
+            final String fieldCmd,
+            final boolean boxRename,
+            final boolean boxCopy) {
         try {
             properties.put("fieldSrc", fieldSrc);
             properties.put("fieldDst", fieldDst);
