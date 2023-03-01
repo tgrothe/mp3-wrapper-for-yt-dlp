@@ -100,67 +100,67 @@ public class Main {
 
     private void startRun() {
         new Thread(
-                () -> {
-                    try {
-                        while (isRunning) {
-                            Pattern pat1 = Pattern.compile(fieldReg.getText());
-                            String data =
-                                    (String)
-                                            Toolkit.getDefaultToolkit()
-                                                    .getSystemClipboard()
-                                                    .getData(DataFlavor.stringFlavor);
-                            if (data != null && data.matches(pat1.pattern())) {
-                                StringSelection dummyStr = new StringSelection("dummy text");
-                                Toolkit.getDefaultToolkit()
-                                        .getSystemClipboard()
-                                        .setContents(dummyStr, dummyStr);
-                                Matcher mat1 = pat1.matcher(data);
-                                if (mat1.find()) {
-                                    String videoId = mat1.group(1);
-                                    processVideoId(videoId);
-                                }
-                            }
+                        () -> {
+                            try {
+                                while (isRunning) {
+                                    Pattern pat1 = Pattern.compile(fieldReg.getText());
+                                    String data =
+                                            (String)
+                                                    Toolkit.getDefaultToolkit()
+                                                            .getSystemClipboard()
+                                                            .getData(DataFlavor.stringFlavor);
+                                    if (data != null && data.matches(pat1.pattern())) {
+                                        StringSelection dummyStr =
+                                                new StringSelection("dummy text");
+                                        Toolkit.getDefaultToolkit()
+                                                .getSystemClipboard()
+                                                .setContents(dummyStr, dummyStr);
+                                        Matcher mat1 = pat1.matcher(data);
+                                        if (mat1.find()) {
+                                            String videoId = mat1.group(1);
+                                            processVideoId(videoId);
+                                        }
+                                    }
 
-                            //noinspection BusyWait
-                            Thread.sleep(3000);
-                        }
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "An exception occurred!\n\n" + e,
-                                "Exception e",
-                                JOptionPane.WARNING_MESSAGE);
-                        System.exit(0);
-                    }
-                }).start();
+                                    //noinspection BusyWait
+                                    Thread.sleep(3000);
+                                }
+                            } catch (Exception e) {
+                                JOptionPane.showMessageDialog(
+                                        null,
+                                        "An exception occurred!\n\n" + e,
+                                        "Exception e",
+                                        JOptionPane.WARNING_MESSAGE);
+                                System.exit(0);
+                            }
+                        })
+                .start();
     }
 
     private void startRun2(final String urls) {
         new Thread(
-                () -> {
-                    try {
-                        Pattern pat1 = Pattern.compile(fieldReg.getText());
-                        String[] lines = urls.split("\n");
-                        for (String l : lines) {
-                            if (l != null
-                                    && !l.isBlank()
-                                    && l.matches(pat1.pattern())) {
-                                Matcher mat1 = pat1.matcher(l);
-                                if (mat1.find()) {
-                                    String videoId = mat1.group(1);
-                                    processVideoId(videoId);
+                        () -> {
+                            try {
+                                Pattern pat1 = Pattern.compile(fieldReg.getText());
+                                String[] lines = urls.split("\n");
+                                for (String l : lines) {
+                                    if (l != null && !l.isBlank() && l.matches(pat1.pattern())) {
+                                        Matcher mat1 = pat1.matcher(l);
+                                        if (mat1.find()) {
+                                            String videoId = mat1.group(1);
+                                            processVideoId(videoId);
+                                        }
+                                    }
                                 }
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(
+                                        null,
+                                        "An exception occurred!\n\n" + ex,
+                                        "Exception e",
+                                        JOptionPane.WARNING_MESSAGE);
+                                System.exit(0);
                             }
-                        }
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "An exception occurred!\n\n" + ex,
-                                "Exception e",
-                                JOptionPane.WARNING_MESSAGE);
-                        System.exit(0);
-                    }
-                })
+                        })
                 .start();
     }
 
@@ -195,7 +195,7 @@ public class Main {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         append("compiler.run = " + compiler.run(null, null, null, sourceFile.getPath()));
         // Load and instantiate compiled class.
-        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
+        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {root.toURI().toURL()});
         Class<?> cls = Class.forName("AdvancedRenamer", true, classLoader);
         renameMethod = cls.getDeclaredMethod("rename", String.class);
         //  Object instance = cls.getDeclaredConstructor().newInstance();
