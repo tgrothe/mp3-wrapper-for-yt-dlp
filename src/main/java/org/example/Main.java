@@ -57,7 +57,7 @@ public class Main {
         frame.addWindowListener(
                 new WindowAdapter() {
                     @Override
-                    public void windowClosing(WindowEvent e) {
+                    public void windowClosing(final WindowEvent e) {
                         isRunning = false;
                     }
                 });
@@ -71,7 +71,7 @@ public class Main {
                     } else {
                         isRunning = true;
                         button1.setText("Stop");
-                        new Thread(this::startRun).start();
+                        startRun();
                     }
                 });
         button2.addActionListener(
@@ -90,7 +90,7 @@ public class Main {
         showSettings(frame);
     }
 
-    private void append(String s) throws Exception {
+    private void append(final String s) throws Exception {
         SwingUtilities.invokeAndWait(
                 () -> {
                     area.append(s + "\n");
@@ -98,56 +98,88 @@ public class Main {
                 });
     }
 
-    @SuppressWarnings("all")
     private void startRun() {
-        try {
-            while (isRunning) {
-                Pattern pat1 = Pattern.compile(fieldReg.getText());
-                String data =
-                        (String)
-                                Toolkit.getDefaultToolkit()
-                                        .getSystemClipboard()
-                                        .getData(DataFlavor.stringFlavor);
-                if (data != null && data.matches(pat1.pattern())) {
-                    StringSelection dummyStr = new StringSelection("dummy text");
-                    Toolkit.getDefaultToolkit()
-                            .getSystemClipboard()
-                            .setContents(dummyStr, dummyStr);
-                    Matcher mat1 = pat1.matcher(data);
-                    if (mat1.find()) {
-                        final String video_id = mat1.group(1);
-                        startVideoId(video_id);
-                    }
-                }
+        new Thread(
+                        () -> {
+                            try {
+                                while (isRunning) {
+                                    Pattern pat1 = Pattern.compile(fieldReg.getText());
+                                    String data =
+                                            (String)
+                                                    Toolkit.getDefaultToolkit()
+                                                            .getSystemClipboard()
+                                                            .getData(DataFlavor.stringFlavor);
+                                    if (data != null && data.matches(pat1.pattern())) {
+                                        StringSelection dummyStr =
+                                                new StringSelection("dummy text");
+                                        Toolkit.getDefaultToolkit()
+                                                .getSystemClipboard()
+                                                .setContents(dummyStr, dummyStr);
+                                        Matcher mat1 = pat1.matcher(data);
+                                        if (mat1.find()) {
+                                            String videoId = mat1.group(1);
+                                            processVideoId(videoId);
+                                        }
+                                    }
 
-                Thread.sleep(3000);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    "An exception occurred!\n\n" + e,
-                    "Exception e",
-                    JOptionPane.WARNING_MESSAGE);
-            System.exit(0);
-        }
+                                    //noinspection BusyWait
+                                    Thread.sleep(3000);
+                                }
+                            } catch (Exception e) {
+                                JOptionPane.showMessageDialog(
+                                        null,
+                                        "An exception occurred!\n\n" + e,
+                                        "Exception e",
+                                        JOptionPane.WARNING_MESSAGE);
+                                System.exit(0);
+                            }
+                        })
+                .start();
     }
 
-    private void startVideoId(final String video_id) throws Exception {
-        append("Found video id " + video_id);
-        download(video_id);
+    private void startRun2(final String urls) {
+        new Thread(
+                        () -> {
+                            try {
+                                Pattern pat1 = Pattern.compile(fieldReg.getText());
+                                String[] lines = urls.split("\n");
+                                for (String l : lines) {
+                                    if (l != null && !l.isBlank() && l.matches(pat1.pattern())) {
+                                        Matcher mat1 = pat1.matcher(l);
+                                        if (mat1.find()) {
+                                            String videoId = mat1.group(1);
+                                            processVideoId(videoId);
+                                        }
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(
+                                        null,
+                                        "An exception occurred!\n\n" + ex,
+                                        "Exception e",
+                                        JOptionPane.WARNING_MESSAGE);
+                                System.exit(0);
+                            }
+                        })
+                .start();
+    }
+
+    private void processVideoId(final String videoId) throws Exception {
+        append("Found video id " + videoId);
+        download(videoId);
         compileRenamer();
         renameFiles();
         copyFiles();
-        append("Finish video id " + video_id);
+        append("Finish video id " + videoId);
     }
 
-    private void download(String video_id) throws Exception {
-        append("Start download " + video_id);
+    private void download(final String videoId) throws Exception {
+        append("Start download " + videoId);
         java.lang.Runtime rt = java.lang.Runtime.getRuntime();
-        @SuppressWarnings("all")
-        Process pr = rt.exec(String.format(fieldCmd.getText(), fieldSrc.getText(), video_id));
+        //noinspection deprecation
+        Process pr = rt.exec(String.format(fieldCmd.getText(), fieldSrc.getText(), videoId));
         pr.waitFor();
-        append("Finish download " + video_id);
+        append("Finish download " + videoId);
     }
 
     private void compileRenamer() throws Exception {
@@ -174,7 +206,7 @@ public class Main {
         if (!boxRename.isSelected()) {
             return;
         }
-        append("Start renameFiles()");
+        append("Start rename files");
         File[] files = new File(fieldSrc.getText()).listFiles();
         assert files != null;
         for (File f : files) {
@@ -192,14 +224,14 @@ public class Main {
                 }
             }
         }
-        append("Finish renameFiles()");
+        append("Finish rename files");
     }
 
     private void copyFiles() throws Exception {
         if (!new File(fieldDst.getText()).exists() || !boxCopy.isSelected()) {
             return;
         }
-        append("Start copyFiles()");
+        append("Start copy files");
         File[] files = new File(fieldSrc.getText()).listFiles();
         assert files != null;
         for (File f : files) {
@@ -215,10 +247,13 @@ public class Main {
                 }
             }
         }
-        append("Finish copyFiles()");
+        append("Finish copy files");
     }
 
-    private void showBulk(JFrame frame) {
+    /*
+    Naming: Please see here: https://english.stackexchange.com/questions/141884/which-is-a-better-and-commonly-used-word-bulk-or-batch
+     */
+    private void showBulk(final JFrame frame) {
         final JTextArea urls = new JTextArea();
         urls.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         final JDialog dialog = new JDialog(frame, "Bulk processing", true);
@@ -234,39 +269,14 @@ public class Main {
         dialog.addWindowListener(
                 new WindowAdapter() {
                     @Override
-                    public void windowClosing(WindowEvent e) {
-                        new Thread(
-                                        () -> {
-                                            try {
-                                                Pattern pat1 = Pattern.compile(fieldReg.getText());
-                                                String[] lines = urls.getText().split("\n");
-                                                for (String l : lines) {
-                                                    if (l != null
-                                                            && !l.isBlank()
-                                                            && l.matches(pat1.pattern())) {
-                                                        Matcher mat1 = pat1.matcher(l);
-                                                        if (mat1.find()) {
-                                                            final String video_id = mat1.group(1);
-                                                            startVideoId(video_id);
-                                                        }
-                                                    }
-                                                }
-                                            } catch (Exception ex) {
-                                                JOptionPane.showMessageDialog(
-                                                        null,
-                                                        "An exception occurred!\n\n" + ex,
-                                                        "Exception e",
-                                                        JOptionPane.WARNING_MESSAGE);
-                                                System.exit(0);
-                                            }
-                                        })
-                                .start();
+                    public void windowClosing(final WindowEvent e) {
+                        startRun2(urls.getText());
                     }
                 });
         dialog.setVisible(true);
     }
 
-    private void showSettings(JFrame frame) {
+    private void showSettings(final JFrame frame) {
         final JDialog dialog = new JDialog(frame, "Customization", true);
         dialog.getContentPane()
                 .add(
@@ -285,7 +295,7 @@ public class Main {
         dialog.addWindowListener(
                 new WindowAdapter() {
                     @Override
-                    public void windowClosing(WindowEvent e) {
+                    public void windowClosing(final WindowEvent e) {
                         fieldSrc.setText(
                                 new File(fieldSrc.getText()).getAbsolutePath() + File.separator);
                         fieldDst.setText(
@@ -303,7 +313,7 @@ public class Main {
         dialog.setVisible(true);
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         new Main();
     }
 }
