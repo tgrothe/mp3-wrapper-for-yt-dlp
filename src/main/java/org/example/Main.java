@@ -15,6 +15,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,11 @@ public class Main {
     private final JCheckBox boxCopy =
             new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxCopy")));
     private final JTextArea area = new JTextArea("Copy your YouTube URL to clipboard...\n\n");
+    private final JButton button1 = new JButton("Start!");
+    private final JButton button2 = new JButton("Bulk processing");
+    private final JButton button3 = new JButton("Settings");
     private volatile boolean isRunning = false;
+    private volatile boolean isLocked = false;
     private Method renameMethod;
 
     public Main() {
@@ -42,9 +47,6 @@ public class Main {
         area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         area.setLineWrap(true);
 
-        JButton button1 = new JButton("Start!");
-        JButton button2 = new JButton("Bulk processing");
-        JButton button3 = new JButton("Settings");
         JPanel panel = new JPanel(new FlowLayout());
         panel.add(button1);
         panel.add(button2);
@@ -66,26 +68,29 @@ public class Main {
 
         button1.addActionListener(
                 e -> {
-                    if (isRunning) {
-                        isRunning = false;
-                        button1.setText("Start!");
-                    } else {
+                    if (!isLocked) {
                         isRunning = true;
                         button1.setText("Stop");
+                        lockAllExcept(1);
                         startRun();
+                    } else {
+                        isRunning = false;
+                        button1.setText("wait...");
                     }
                 });
         button2.addActionListener(
                 e -> {
-                    isRunning = false;
-                    button1.setText("Start!");
-                    showBulk(frame);
+                    if (!isLocked) {
+                        lockAllExcept();
+                        showBulk(frame);
+                    }
                 });
         button3.addActionListener(
                 e -> {
-                    isRunning = false;
-                    button1.setText("Start!");
-                    showSettings(frame);
+                    if (!isLocked) {
+                        lockAllExcept();
+                        showSettings(frame);
+                    }
                 });
 
         showSettings(frame);
@@ -97,6 +102,44 @@ public class Main {
                     area.append(s + "\n");
                     area.setCaretPosition(area.getText().length());
                 });
+    }
+
+    private void lockAllExcept(final int... excepts) {
+        isLocked = true;
+        HashSet<Integer> set = new HashSet<>();
+        if (excepts != null) {
+            for (int i : excepts) {
+                set.add(i);
+            }
+        }
+        if (!set.contains(1)) {
+            button1.setEnabled(false);
+        }
+        if (!set.contains(2)) {
+            button2.setEnabled(false);
+        }
+        if (!set.contains(3)) {
+            button3.setEnabled(false);
+        }
+    }
+
+    private void unlockAllExcept(final int... excepts) {
+        isLocked = false;
+        HashSet<Integer> set = new HashSet<>();
+        if (excepts != null) {
+            for (int i : excepts) {
+                set.add(i);
+            }
+        }
+        if (!set.contains(1)) {
+            button1.setEnabled(true);
+        }
+        if (!set.contains(2)) {
+            button2.setEnabled(true);
+        }
+        if (!set.contains(3)) {
+            button3.setEnabled(true);
+        }
     }
 
     private void startRun() {
@@ -126,6 +169,8 @@ public class Main {
                                     //noinspection BusyWait
                                     Thread.sleep(3000);
                                 }
+                                unlockAllExcept();
+                                button1.setText("Start!");
                             } catch (Exception ex) {
                                 JOptionPane.showMessageDialog(
                                         null,
@@ -153,6 +198,7 @@ public class Main {
                                         }
                                     }
                                 }
+                                unlockAllExcept();
                             } catch (Exception ex) {
                                 JOptionPane.showMessageDialog(
                                         null,
@@ -309,6 +355,7 @@ public class Main {
                                 fieldCmd.getText(),
                                 boxRename.isSelected(),
                                 boxCopy.isSelected());
+                        unlockAllExcept();
                     }
                 });
         dialog.setVisible(true);
