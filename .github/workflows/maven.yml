@@ -33,7 +33,7 @@ jobs:
             src:
               - 'src/**'
       - name: Build with Maven
-        if: steps.changes.outputs.pom == 'true' || steps.changes.outputs.src == 'true'
+        if: steps.changes.outputs.pom == 'true' && steps.changes.outputs.src == 'true'
         run: |
           mvn -B clean compile assembly:single --file pom.xml
       - name: Upload build
