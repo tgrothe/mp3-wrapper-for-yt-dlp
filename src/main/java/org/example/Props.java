@@ -9,7 +9,7 @@ import javax.swing.*;
 
 public class Props {
     public final Properties properties = new Properties();
-    private final File pf = new File("MP3WatcherProps.txt");
+    private final File pf = new File("mp3-wrapper-for-yt-dlp.txt");
 
     public Props() {
         try {
@@ -84,7 +84,7 @@ public class Props {
             properties.put("boxRename", String.valueOf(boxRename));
             properties.put("boxCopy", String.valueOf(boxCopy));
             try (FileOutputStream fos = new FileOutputStream(pf)) {
-                properties.store(fos, "Properties for MP3Watcher");
+                properties.store(fos, "Properties for mp3-wrapper-for-yt-dlp");
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(
