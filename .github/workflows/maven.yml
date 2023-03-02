@@ -32,7 +32,7 @@ jobs:
         run: |
           git config user.email "tgrothe@users.noreply.github.com"
           git config user.name "tgrothe"
-          git add target/mp3-wrapper-for-yt-dlp-*.jar -f
+          git add .
           git commit -m "Automatically build upload"
           git push
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
