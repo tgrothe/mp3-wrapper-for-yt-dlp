@@ -31,7 +31,7 @@ jobs:
         id: verify-changed-files
         with:
           files: |
-            pom.xml
+            target/mp3-wrapper-for-yt-dlp-*.jar
       - name: Upload build
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
