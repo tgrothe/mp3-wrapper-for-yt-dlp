@@ -8,7 +8,7 @@ import java.util.Properties;
 import javax.swing.*;
 
 public class Props {
-    public final Properties properties = new Properties();
+    public final Properties properties = new    Properties();
     private final File pf = new File("mp3-wrapper-for-yt-dlp.txt");
 
     public Props() {
