@@ -3,9 +3,6 @@ package org.example;
 import io.codeworth.panelmatic.PanelBuilder;
 import io.codeworth.panelmatic.PanelMatic;
 
-import javax.swing.*;
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -21,6 +18,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.*;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 
 public class Main {
     private final Props props = new Props();
