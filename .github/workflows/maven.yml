@@ -24,11 +24,20 @@ jobs:
           version: 1.16.0
           # --skip-sorting-imports
           args: "--aosp --skip-reflowing-long-strings --skip-javadoc-formatting --replace"
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            pom:
+              - 'pom.xml'
+            src:
+              - 'src/**'
       - name: Build with Maven
+        if: steps.changes.outputs.pom == 'true' || steps.changes.outputs.src == 'true'
         run: |
           mvn -B clean compile assembly:single --file pom.xml
       - name: Upload build
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: always()
         run: |
           git config user.email "tgrothe@users.noreply.github.com"
           git config user.name "tgrothe"
