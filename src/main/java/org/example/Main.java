@@ -3,9 +3,6 @@ package org.example;
 import io.codeworth.panelmatic.PanelBuilder;
 import io.codeworth.panelmatic.PanelMatic;
 
-import javax.swing.*;
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -20,6 +17,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.*;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 
 public class Main {
     private final Props props = new Props();
@@ -125,11 +126,11 @@ public class Main {
                                     //noinspection BusyWait
                                     Thread.sleep(3000);
                                 }
-                            } catch (Exception e) {
+                            } catch (Exception ex) {
                                 JOptionPane.showMessageDialog(
                                         null,
-                                        "An exception occurred!\n\n" + e,
-                                        "Exception e",
+                                        "An exception occurred!\n\n" + ex,
+                                        "Exception ex",
                                         JOptionPane.WARNING_MESSAGE);
                                 System.exit(0);
                             }

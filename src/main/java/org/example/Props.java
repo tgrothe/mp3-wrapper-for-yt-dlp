@@ -1,14 +1,15 @@
 package org.example;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
+import javax.swing.*;
+
 public class Props {
     public final Properties properties = new Properties();
-    private final File pf = new File("MP3WatcherProps.txt");
+    private final File pf = new File("mp3-wrapper-for-yt-dlp.txt");
 
     public Props() {
         try {
@@ -56,11 +57,11 @@ public class Props {
             if (!properties.containsKey("boxCopy")) {
                 properties.put("boxCopy", "true");
             }
-        } catch (Exception e) {
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(
                     null,
-                    "An exception occurred!\n\n" + e,
-                    "Exception e",
+                    "An exception occurred!\n\n" + ex,
+                    "Exception ex",
                     JOptionPane.WARNING_MESSAGE);
             System.exit(0);
         }
@@ -83,13 +84,13 @@ public class Props {
             properties.put("boxRename", String.valueOf(boxRename));
             properties.put("boxCopy", String.valueOf(boxCopy));
             try (FileOutputStream fos = new FileOutputStream(pf)) {
-                properties.store(fos, "Properties for MP3Watcher");
+                properties.store(fos, "Properties for mp3-wrapper-for-yt-dlp");
             }
-        } catch (Exception e) {
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(
                     null,
-                    "An exception occurred!\n\n" + e,
-                    "Exception e",
+                    "An exception occurred!\n\n" + ex,
+                    "Exception ex",
                     JOptionPane.WARNING_MESSAGE);
             System.exit(0);
         }
