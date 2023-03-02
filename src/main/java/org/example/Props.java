@@ -57,11 +57,11 @@ public class Props {
             if (!properties.containsKey("boxCopy")) {
                 properties.put("boxCopy", "true");
             }
-        } catch (Exception e) {
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(
                     null,
-                    "An exception occurred!\n\n" + e,
-                    "Exception e",
+                    "An exception occurred!\n\n" + ex,
+                    "Exception ex",
                     JOptionPane.WARNING_MESSAGE);
             System.exit(0);
         }
@@ -86,11 +86,11 @@ public class Props {
             try (FileOutputStream fos = new FileOutputStream(pf)) {
                 properties.store(fos, "Properties for mp3-wrapper-for-yt-dlp");
             }
-        } catch (Exception e) {
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(
                     null,
-                    "An exception occurred!\n\n" + e,
-                    "Exception e",
+                    "An exception occurred!\n\n" + ex,
+                    "Exception ex",
                     JOptionPane.WARNING_MESSAGE);
             System.exit(0);
         }

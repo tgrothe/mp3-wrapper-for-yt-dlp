@@ -126,11 +126,11 @@ public class Main {
                                     //noinspection BusyWait
                                     Thread.sleep(3000);
                                 }
-                            } catch (Exception e) {
+                            } catch (Exception ex) {
                                 JOptionPane.showMessageDialog(
                                         null,
-                                        "An exception occurred!\n\n" + e,
-                                        "Exception e",
+                                        "An exception occurred!\n\n" + ex,
+                                        "Exception ex",
                                         JOptionPane.WARNING_MESSAGE);
                                 System.exit(0);
                             }
