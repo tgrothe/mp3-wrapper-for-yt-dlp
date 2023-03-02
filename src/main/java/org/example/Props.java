@@ -12,7 +12,7 @@ public class Props {
     private final File pf = new File("MP3WatcherProps.txt");
 
     public Props() {
-         try {
+        try {
             if (pf.exists()) {
                 properties.load(new FileInputStream(pf));
             }
