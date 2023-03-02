@@ -24,4 +24,5 @@ hs_err_pid*
 
 .idea/
 target/
+!target/mp3-wrapper-for-yt-dlp-*.jar
 MP3WatcherProps.txt
