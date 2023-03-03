@@ -19,11 +19,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
-      - uses: axel-op/googlejavaformat-action@v3
-        with:
-          version: v1.16.0
-          # --skip-sorting-imports
-          args: "--aosp --skip-reflowing-long-strings --skip-javadoc-formatting --replace"
       - uses: dorny/paths-filter@v2
         id: changes
         with:
@@ -32,12 +27,18 @@ jobs:
               - 'pom.xml'
             src:
               - 'src/**'
+      - uses: axel-op/googlejavaformat-action@v3
+        if: steps.changes.outputs.pom == 'true' && steps.changes.outputs.src == 'true'
+        with:
+          version: v1.16.0
+          # --skip-sorting-imports
+          args: "--aosp --skip-reflowing-long-strings --skip-javadoc-formatting --replace"
       - name: Build with Maven
         if: steps.changes.outputs.pom == 'true' && steps.changes.outputs.src == 'true'
         run: |
           mvn -B clean compile assembly:single --file pom.xml
       - name: Upload build
-        continue-on-error: true
+        if: steps.changes.outputs.pom == 'true' && steps.changes.outputs.src == 'true'
         run: |
           git config user.email "tgrothe@users.noreply.github.com"
           git config user.name "tgrothe"
