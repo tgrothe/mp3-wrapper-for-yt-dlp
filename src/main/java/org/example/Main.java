@@ -15,7 +15,9 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.HashSet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,12 +37,74 @@ public class Main {
     private final JCheckBox boxCopy =
             new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxCopy")));
     private final JTextArea area = new JTextArea("Copy your YouTube URL to clipboard...\n\n");
-    private final JButton button1 = new JButton("Start!");
-    private final JButton button2 = new JButton("Bulk processing");
-    private final JButton button3 = new JButton("Settings");
+    private final JButton[] buttons = {
+        new JButton("Start!"), new JButton("Bulk processing"), new JButton("Settings")
+    };
+    private final Task[] tasks = new Task[buttons.length];
     private volatile boolean isRunning = false;
-    private volatile boolean isLocked = false;
     private Method renameMethod;
+
+    public static void exceptionOccurred(final Exception ex) {
+        JOptionPane.showMessageDialog(
+                null,
+                "An exception occurred!\n\n" + ex,
+                "Exception ex",
+                JOptionPane.WARNING_MESSAGE);
+        System.exit(0);
+    }
+
+    public class Task {
+        private final JButton button;
+        private final String buttonText;
+        private final Runnable runnable;
+        private final boolean loop;
+        private ScheduledExecutorService executor;
+
+        public Task(final JButton button, final Runnable runnable, final boolean loop) {
+            this.button = button;
+            this.buttonText = button.getText();
+            this.runnable = runnable;
+            this.loop = loop;
+        }
+
+        public void start() {
+            button.setText("Running...");
+            for (JButton b : buttons) {
+                if (b != button) {
+                    b.setEnabled(false);
+                }
+            }
+            isRunning = true;
+            executor = Executors.newSingleThreadScheduledExecutor();
+            if (loop) {
+                executor.scheduleAtFixedRate(runnable, 0, 3, TimeUnit.SECONDS);
+            } else {
+                executor.execute(runnable);
+            }
+        }
+
+        public void stop() {
+            button.setText("wait...");
+            isRunning = false;
+            executor.shutdown();
+            new Thread(
+                            () -> {
+                                try {
+                                    if (executor.awaitTermination(10, TimeUnit.MINUTES)) {
+                                        button.setText(buttonText);
+                                        for (JButton b : buttons) {
+                                            if (b != button) {
+                                                b.setEnabled(true);
+                                            }
+                                        }
+                                    }
+                                } catch (InterruptedException ex) {
+                                    Main.exceptionOccurred(ex);
+                                }
+                            })
+                    .start();
+        }
+    }
 
     public Main() {
         fieldReg2.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
@@ -48,9 +112,9 @@ public class Main {
         area.setLineWrap(true);
 
         JPanel panel = new JPanel(new FlowLayout());
-        panel.add(button1);
-        panel.add(button2);
-        panel.add(button3);
+        for (JButton b : buttons) {
+            panel.add(b);
+        }
 
         JFrame frame = new JFrame("Download, rename, copy/sync");
         frame.add(panel, BorderLayout.NORTH);
@@ -66,124 +130,126 @@ public class Main {
                 });
         frame.setVisible(true);
 
-        button1.addActionListener(
-                e -> {
-                    if (!isLocked) {
-                        isRunning = true;
-                        button1.setText("Stop");
-                        lockAllExcept(1);
-                        startRun();
-                    } else {
-                        isRunning = false;
-                        button1.setText("wait...");
-                    }
-                });
-        button2.addActionListener(
-                e -> {
-                    if (!isLocked) {
-                        lockAllExcept();
-                        showBulk(frame);
-                    }
-                });
-        button3.addActionListener(
-                e -> {
-                    if (!isLocked) {
-                        lockAllExcept();
-                        showSettings(frame);
-                    }
-                });
+        tasks[0] = new Task(buttons[0], this::buttonAction0, true);
+        tasks[1] = new Task(buttons[1], () -> buttonAction1(frame), false);
+        tasks[2] = new Task(buttons[2], () -> buttonAction2(frame), false);
+        for (int i = 0; i < buttons.length; i++) {
+            final int fi = i;
+            buttons[fi].addActionListener(
+                    e -> {
+                        if (isRunning) {
+                            tasks[fi].stop();
+                        } else {
+                            tasks[fi].start();
+                        }
+                    });
+        }
 
-        showSettings(frame);
+        buttons[2].doClick();
     }
 
     private void append(final String s) throws Exception {
-        SwingUtilities.invokeAndWait(
-                () -> {
-                    area.append(s + "\n");
-                    area.setCaretPosition(area.getText().length());
+        if (SwingUtilities.isEventDispatchThread()) {
+            area.append(s + "\n");
+            area.setCaretPosition(area.getText().length());
+            area.revalidate();
+            area.repaint();
+        } else {
+            SwingUtilities.invokeAndWait(
+                    () -> {
+                        area.append(s + "\n");
+                        area.setCaretPosition(area.getText().length());
+                    });
+        }
+    }
+
+    private void buttonAction0() {
+        try {
+            Pattern pat1 = Pattern.compile(fieldReg.getText());
+            String data =
+                    (String)
+                            Toolkit.getDefaultToolkit()
+                                    .getSystemClipboard()
+                                    .getData(DataFlavor.stringFlavor);
+            if (data != null && data.matches(pat1.pattern())) {
+                StringSelection dummyStr = new StringSelection("dummy text");
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(dummyStr, dummyStr);
+                Matcher mat1 = pat1.matcher(data);
+                if (mat1.find()) {
+                    String videoId = mat1.group(1);
+                    processVideoId(videoId);
+                }
+            }
+        } catch (Exception ex) {
+            exceptionOccurred(ex);
+        }
+    }
+
+    /*
+    Naming: Please see here: https://english.stackexchange.com/questions/141884/which-is-a-better-and-commonly-used-word-bulk-or-batch
+     */
+    private void buttonAction1(final JFrame frame) {
+        final JTextArea urls = new JTextArea();
+        urls.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        final JDialog dialog = new JDialog(frame, "Bulk processing", true);
+        dialog.getContentPane()
+                .add(
+                        PanelMatic.begin()
+                                .addHeader(
+                                        PanelBuilder.HeaderLevel.H3, "Add one URL per line here...")
+                                .add("URLs:", urls)
+                                .get());
+        dialog.pack();
+        dialog.setSize(600, 600);
+        dialog.addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(final WindowEvent e) {
+                        startBulk(urls.getText());
+                    }
                 });
+        dialog.setVisible(true);
     }
 
-    private void lockAllExcept(final int... excepts) {
-        isLocked = true;
-        HashSet<Integer> set = new HashSet<>();
-        if (excepts != null) {
-            for (int i : excepts) {
-                set.add(i);
-            }
-        }
-        if (!set.contains(1)) {
-            button1.setEnabled(false);
-        }
-        if (!set.contains(2)) {
-            button2.setEnabled(false);
-        }
-        if (!set.contains(3)) {
-            button3.setEnabled(false);
-        }
+    private void buttonAction2(final JFrame frame) {
+        final JDialog dialog = new JDialog(frame, "Customization", true);
+        dialog.getContentPane()
+                .add(
+                        PanelMatic.begin()
+                                .addHeader(PanelBuilder.HeaderLevel.H3, "Customization")
+                                .add("Source folder:", fieldSrc)
+                                .add("To copy folder:", fieldDst)
+                                .add("RegEx (do not change):", fieldReg)
+                                .add("Replace RegEx:", fieldReg2)
+                                .add("CLI Command (do not change):", fieldCmd)
+                                .add("Should rename?", boxRename)
+                                .add("Should copy/sync?", boxCopy)
+                                .get());
+        dialog.pack();
+        dialog.setSize(dialog.getWidth() + 50, dialog.getHeight());
+        dialog.addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(final WindowEvent e) {
+                        fieldSrc.setText(
+                                new File(fieldSrc.getText()).getAbsolutePath() + File.separator);
+                        fieldDst.setText(
+                                new File(fieldDst.getText()).getAbsolutePath() + File.separator);
+                        props.storeProps(
+                                fieldSrc.getText(),
+                                fieldDst.getText(),
+                                fieldReg.getText(),
+                                fieldReg2.getText(),
+                                fieldCmd.getText(),
+                                boxRename.isSelected(),
+                                boxCopy.isSelected());
+                        tasks[2].stop();
+                    }
+                });
+        dialog.setVisible(true);
     }
 
-    private void unlockAllExcept(final int... excepts) {
-        isLocked = false;
-        HashSet<Integer> set = new HashSet<>();
-        if (excepts != null) {
-            for (int i : excepts) {
-                set.add(i);
-            }
-        }
-        if (!set.contains(1)) {
-            button1.setEnabled(true);
-        }
-        if (!set.contains(2)) {
-            button2.setEnabled(true);
-        }
-        if (!set.contains(3)) {
-            button3.setEnabled(true);
-        }
-    }
-
-    private void startRun() {
-        new Thread(
-                        () -> {
-                            try {
-                                while (isRunning) {
-                                    Pattern pat1 = Pattern.compile(fieldReg.getText());
-                                    String data =
-                                            (String)
-                                                    Toolkit.getDefaultToolkit()
-                                                            .getSystemClipboard()
-                                                            .getData(DataFlavor.stringFlavor);
-                                    if (data != null && data.matches(pat1.pattern())) {
-                                        StringSelection dummyStr =
-                                                new StringSelection("dummy text");
-                                        Toolkit.getDefaultToolkit()
-                                                .getSystemClipboard()
-                                                .setContents(dummyStr, dummyStr);
-                                        Matcher mat1 = pat1.matcher(data);
-                                        if (mat1.find()) {
-                                            String videoId = mat1.group(1);
-                                            processVideoId(videoId);
-                                        }
-                                    }
-
-                                    //noinspection BusyWait
-                                    Thread.sleep(3000);
-                                }
-                                unlockAllExcept();
-                                button1.setText("Start!");
-                            } catch (Exception ex) {
-                                JOptionPane.showMessageDialog(
-                                        null,
-                                        "An exception occurred!\n\n" + ex,
-                                        "Exception ex",
-                                        JOptionPane.WARNING_MESSAGE);
-                                System.exit(0);
-                            }
-                        })
-                .start();
-    }
-
-    private void startRun2(final String urls) {
+    private void startBulk(final String urls) {
         new Thread(
                         () -> {
                             try {
@@ -198,14 +264,9 @@ public class Main {
                                         }
                                     }
                                 }
-                                unlockAllExcept();
+                                tasks[1].stop();
                             } catch (Exception ex) {
-                                JOptionPane.showMessageDialog(
-                                        null,
-                                        "An exception occurred!\n\n" + ex,
-                                        "Exception e",
-                                        JOptionPane.WARNING_MESSAGE);
-                                System.exit(0);
+                                exceptionOccurred(ex);
                             }
                         })
                 .start();
@@ -295,70 +356,6 @@ public class Main {
             }
         }
         append("Finish copy files");
-    }
-
-    /*
-    Naming: Please see here: https://english.stackexchange.com/questions/141884/which-is-a-better-and-commonly-used-word-bulk-or-batch
-     */
-    private void showBulk(final JFrame frame) {
-        final JTextArea urls = new JTextArea();
-        urls.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        final JDialog dialog = new JDialog(frame, "Bulk processing", true);
-        dialog.getContentPane()
-                .add(
-                        PanelMatic.begin()
-                                .addHeader(
-                                        PanelBuilder.HeaderLevel.H3, "Add one URL per line here...")
-                                .add("URLs:", urls)
-                                .get());
-        dialog.pack();
-        dialog.setSize(600, 600);
-        dialog.addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(final WindowEvent e) {
-                        startRun2(urls.getText());
-                    }
-                });
-        dialog.setVisible(true);
-    }
-
-    private void showSettings(final JFrame frame) {
-        final JDialog dialog = new JDialog(frame, "Customization", true);
-        dialog.getContentPane()
-                .add(
-                        PanelMatic.begin()
-                                .addHeader(PanelBuilder.HeaderLevel.H3, "Customization")
-                                .add("Source folder:", fieldSrc)
-                                .add("To copy folder:", fieldDst)
-                                .add("RegEx (do not change):", fieldReg)
-                                .add("Replace RegEx:", fieldReg2)
-                                .add("CLI Command (do not change):", fieldCmd)
-                                .add("Should rename?", boxRename)
-                                .add("Should copy/sync?", boxCopy)
-                                .get());
-        dialog.pack();
-        dialog.setSize(dialog.getWidth() + 50, dialog.getHeight());
-        dialog.addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(final WindowEvent e) {
-                        fieldSrc.setText(
-                                new File(fieldSrc.getText()).getAbsolutePath() + File.separator);
-                        fieldDst.setText(
-                                new File(fieldDst.getText()).getAbsolutePath() + File.separator);
-                        props.storeProps(
-                                fieldSrc.getText(),
-                                fieldDst.getText(),
-                                fieldReg.getText(),
-                                fieldReg2.getText(),
-                                fieldCmd.getText(),
-                                boxRename.isSelected(),
-                                boxCopy.isSelected());
-                        unlockAllExcept();
-                    }
-                });
-        dialog.setVisible(true);
     }
 
     public static void main(final String[] args) {
