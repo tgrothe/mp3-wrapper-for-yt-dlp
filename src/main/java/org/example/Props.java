@@ -5,8 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
-import javax.swing.*;
-
 public class Props {
     public final Properties properties = new Properties();
     private final File pf = new File("mp3-wrapper-for-yt-dlp.txt");
@@ -58,12 +56,7 @@ public class Props {
                 properties.put("boxCopy", "true");
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    "An exception occurred!\n\n" + ex,
-                    "Exception ex",
-                    JOptionPane.WARNING_MESSAGE);
-            System.exit(0);
+            Main.exceptionOccurred(ex);
         }
     }
 
@@ -87,12 +80,7 @@ public class Props {
                 properties.store(fos, "Properties for mp3-wrapper-for-yt-dlp");
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    "An exception occurred!\n\n" + ex,
-                    "Exception ex",
-                    JOptionPane.WARNING_MESSAGE);
-            System.exit(0);
+            Main.exceptionOccurred(ex);
         }
     }
 }
