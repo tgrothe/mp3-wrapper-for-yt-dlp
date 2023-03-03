@@ -7,6 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: delivery-much/actions-assigner@v1
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          # team-reviewers: backend
+        #with:
+        #  token: ${{ secrets.GH_TOKEN }}
+        #    team-reviewers: backend
