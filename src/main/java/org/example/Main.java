@@ -67,6 +67,10 @@ public class Main {
             this.loop = loop;
         }
 
+        public boolean isLoop() {
+            return loop;
+        }
+
         public void start() {
             button.setText("Running...");
             for (JButton b : buttons) {
@@ -138,7 +142,9 @@ public class Main {
             buttons[fi].addActionListener(
                     e -> {
                         if (isRunning) {
-                            tasks[fi].stop();
+                            if (tasks[fi].isLoop()) {
+                                tasks[fi].stop();
+                            }
                         } else {
                             tasks[fi].start();
                         }
@@ -150,6 +156,8 @@ public class Main {
 
     private void append(final String s) throws Exception {
         if (SwingUtilities.isEventDispatchThread()) {
+            // avoid this / avoid calling this method from EDT:
+            // won't work if a modal window is in front
             area.append(s + "\n");
             area.setCaretPosition(area.getText().length());
             area.revalidate();
@@ -205,10 +213,29 @@ public class Main {
                 new WindowAdapter() {
                     @Override
                     public void windowClosing(final WindowEvent e) {
-                        startBulk(urls.getText());
+                        new Thread(() -> startBulk(urls.getText())).start();
                     }
                 });
         dialog.setVisible(true);
+    }
+
+    private void startBulk(final String urls) {
+        try {
+            Pattern pat1 = Pattern.compile(fieldReg.getText());
+            String[] lines = urls.split("\n");
+            for (String l : lines) {
+                if (l != null && !l.isBlank() && l.matches(pat1.pattern())) {
+                    Matcher mat1 = pat1.matcher(l);
+                    if (mat1.find()) {
+                        String videoId = mat1.group(1);
+                        processVideoId(videoId);
+                    }
+                }
+            }
+            tasks[1].stop();
+        } catch (Exception ex) {
+            exceptionOccurred(ex);
+        }
     }
 
     private void buttonAction2(final JFrame frame) {
@@ -247,29 +274,6 @@ public class Main {
                     }
                 });
         dialog.setVisible(true);
-    }
-
-    private void startBulk(final String urls) {
-        new Thread(
-                        () -> {
-                            try {
-                                Pattern pat1 = Pattern.compile(fieldReg.getText());
-                                String[] lines = urls.split("\n");
-                                for (String l : lines) {
-                                    if (l != null && !l.isBlank() && l.matches(pat1.pattern())) {
-                                        Matcher mat1 = pat1.matcher(l);
-                                        if (mat1.find()) {
-                                            String videoId = mat1.group(1);
-                                            processVideoId(videoId);
-                                        }
-                                    }
-                                }
-                                tasks[1].stop();
-                            } catch (Exception ex) {
-                                exceptionOccurred(ex);
-                            }
-                        })
-                .start();
     }
 
     private void processVideoId(final String videoId) throws Exception {
