@@ -15,9 +15,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,12 +34,9 @@ public class Main {
     private final JCheckBox boxCopy =
             new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxCopy")));
     private final JTextArea area = new JTextArea("Copy your YouTube URL to clipboard...\n\n");
-    private final JButton[] buttons = {
-        new JButton("Start!"), new JButton("Bulk processing"), new JButton("Settings")
-    };
-    private final Task[] tasks = new Task[buttons.length];
-    private volatile boolean isRunning = false;
+    private final ButtonControl control = new ButtonControl();
     private Method renameMethod;
+    private String urlsText;
 
     public static void exceptionOccurred(final Exception ex) {
         JOptionPane.showMessageDialog(
@@ -53,98 +47,40 @@ public class Main {
         System.exit(0);
     }
 
-    public class Task {
-        private final JButton button;
-        private final String buttonText;
-        private final Runnable runnable;
-        private final boolean loop;
-        private ScheduledExecutorService executor;
-
-        public Task(final JButton button, final Runnable runnable, final boolean loop) {
-            this.button = button;
-            this.buttonText = button.getText();
-            this.runnable = runnable;
-            this.loop = loop;
-        }
-
-        public boolean isLoop() {
-            return loop;
-        }
-
-        public void start() {
-            button.setText("Running...");
-            for (JButton b : buttons) {
-                if (b != button) {
-                    b.setEnabled(false);
-                }
-            }
-            isRunning = true;
-            executor = Executors.newSingleThreadScheduledExecutor();
-            if (loop) {
-                executor.scheduleAtFixedRate(runnable, 0, 3, TimeUnit.SECONDS);
-            } else {
-                executor.execute(runnable);
-            }
-        }
-
-        public void stop() {
-            button.setText("wait...");
-            isRunning = false;
-            executor.shutdown();
-            new Thread(
-                            () -> {
-                                try {
-                                    if (executor.awaitTermination(10, TimeUnit.MINUTES)) {
-                                        button.setText(buttonText);
-                                        for (JButton b : buttons) {
-                                            if (b != button) {
-                                                b.setEnabled(true);
-                                            }
-                                        }
-                                    }
-                                } catch (InterruptedException ex) {
-                                    Main.exceptionOccurred(ex);
-                                }
-                            })
-                    .start();
-        }
-    }
-
     public Main() {
         fieldReg2.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         area.setLineWrap(true);
 
-        JPanel panel = new JPanel(new FlowLayout());
-        for (JButton b : buttons) {
-            panel.add(b);
-        }
-
         JFrame frame = new JFrame("Download, rename, copy/sync");
+
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.add(control.addButton("Start!", "runs...", true, this::buttonAction0));
+        panel.add(
+                control.addButton(
+                        "Bulk process",
+                        "runs...",
+                        false,
+                        () -> buttonAction1(frame),
+                        () -> startBulk(urlsText)));
+        panel.add(control.addButton("Settings", "runs...", false, () -> buttonAction2(frame)));
+        panel.add(
+                control.addButton(
+                        "Info",
+                        "runs...",
+                        false,
+                        () -> {
+                            System.out.println("Hallo");
+                            // control.clickButton(3);
+                        }));
+
         frame.add(panel, BorderLayout.NORTH);
         frame.add(new JScrollPane(area));
         frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
-        tasks[0] = new Task(buttons[0], this::buttonAction0, true);
-        tasks[1] = new Task(buttons[1], () -> buttonAction1(frame), false);
-        tasks[2] = new Task(buttons[2], () -> buttonAction2(frame), false);
-        for (int i = 0; i < buttons.length; i++) {
-            final int fi = i;
-            buttons[fi].addActionListener(
-                    e -> {
-                        if (isRunning) {
-                            if (tasks[fi].isLoop()) {
-                                tasks[fi].stop();
-                            }
-                        } else {
-                            tasks[fi].start();
-                        }
-                    });
-        }
-
-        buttons[2].doClick();
+        control.clickButton(2);
     }
 
     private void append(final String s) throws Exception {
@@ -206,7 +142,8 @@ public class Main {
                 new WindowAdapter() {
                     @Override
                     public void windowClosing(final WindowEvent e) {
-                        new Thread(() -> startBulk(urls.getText())).start();
+                        urlsText = urls.getText();
+                        control.clickButton(1);
                     }
                 });
         dialog.setVisible(true);
@@ -225,7 +162,7 @@ public class Main {
                     }
                 }
             }
-            tasks[1].stop();
+            control.clickButton(1);
         } catch (Exception ex) {
             exceptionOccurred(ex);
         }
@@ -263,7 +200,7 @@ public class Main {
                                 fieldCmd.getText(),
                                 boxRename.isSelected(),
                                 boxCopy.isSelected());
-                        tasks[2].stop();
+                        control.clickButton(2);
                     }
                 });
         dialog.setVisible(true);
