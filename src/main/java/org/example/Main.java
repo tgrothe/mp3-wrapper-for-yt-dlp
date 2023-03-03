@@ -124,14 +124,7 @@ public class Main {
         frame.add(panel, BorderLayout.NORTH);
         frame.add(new JScrollPane(area));
         frame.setSize(800, 600);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(final WindowEvent e) {
-                        isRunning = false;
-                    }
-                });
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
         tasks[0] = new Task(buttons[0], this::buttonAction0, true);
