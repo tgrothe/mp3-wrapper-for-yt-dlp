@@ -38,7 +38,7 @@ public class Main {
             new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxCopy")));
     private final JTextArea area = new JTextArea("Copy your YouTube URL to clipboard...\n\n");
     private final JButton[] buttons = {
-            new JButton("Start!"), new JButton("Bulk processing"), new JButton("Settings")
+        new JButton("Start!"), new JButton("Bulk processing"), new JButton("Settings")
     };
     private final Task[] tasks = new Task[buttons.length];
     private volatile boolean isRunning = false;
@@ -92,20 +92,20 @@ public class Main {
             isRunning = false;
             executor.shutdown();
             new Thread(
-                    () -> {
-                        try {
-                            if (executor.awaitTermination(10, TimeUnit.MINUTES)) {
-                                button.setText(buttonText);
-                                for (JButton b : buttons) {
-                                    if (b != button) {
-                                        b.setEnabled(true);
+                            () -> {
+                                try {
+                                    if (executor.awaitTermination(10, TimeUnit.MINUTES)) {
+                                        button.setText(buttonText);
+                                        for (JButton b : buttons) {
+                                            if (b != button) {
+                                                b.setEnabled(true);
+                                            }
+                                        }
                                     }
+                                } catch (InterruptedException ex) {
+                                    Main.exceptionOccurred(ex);
                                 }
-                            }
-                        } catch (InterruptedException ex) {
-                            Main.exceptionOccurred(ex);
-                        }
-                    })
+                            })
                     .start();
         }
     }
@@ -307,7 +307,7 @@ public class Main {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         append("compiler.run = " + compiler.run(null, null, null, sourceFile.getPath()));
         // Load and instantiate compiled class.
-        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
+        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {root.toURI().toURL()});
         Class<?> cls = Class.forName("AdvancedRenamer", true, classLoader);
         renameMethod = cls.getDeclaredMethod("rename", String.class);
         //  Object instance = cls.getDeclaredConstructor().newInstance();
