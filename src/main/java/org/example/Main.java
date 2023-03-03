@@ -38,7 +38,7 @@ public class Main {
             new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxCopy")));
     private final JTextArea area = new JTextArea("Copy your YouTube URL to clipboard...\n\n");
     private final JButton[] buttons = {
-        new JButton("Start!"), new JButton("Bulk processing"), new JButton("Settings")
+            new JButton("Start!"), new JButton("Bulk processing"), new JButton("Settings")
     };
     private final Task[] tasks = new Task[buttons.length];
     private volatile boolean isRunning = false;
@@ -67,6 +67,10 @@ public class Main {
             this.loop = loop;
         }
 
+        public boolean isLoop() {
+            return loop;
+        }
+
         public void start() {
             button.setText("Running...");
             for (JButton b : buttons) {
@@ -88,20 +92,20 @@ public class Main {
             isRunning = false;
             executor.shutdown();
             new Thread(
-                            () -> {
-                                try {
-                                    if (executor.awaitTermination(10, TimeUnit.MINUTES)) {
-                                        button.setText(buttonText);
-                                        for (JButton b : buttons) {
-                                            if (b != button) {
-                                                b.setEnabled(true);
-                                            }
-                                        }
+                    () -> {
+                        try {
+                            if (executor.awaitTermination(10, TimeUnit.MINUTES)) {
+                                button.setText(buttonText);
+                                for (JButton b : buttons) {
+                                    if (b != button) {
+                                        b.setEnabled(true);
                                     }
-                                } catch (InterruptedException ex) {
-                                    Main.exceptionOccurred(ex);
                                 }
-                            })
+                            }
+                        } catch (InterruptedException ex) {
+                            Main.exceptionOccurred(ex);
+                        }
+                    })
                     .start();
         }
     }
@@ -138,7 +142,9 @@ public class Main {
             buttons[fi].addActionListener(
                     e -> {
                         if (isRunning) {
-                            tasks[fi].stop();
+                            if (tasks[fi].isLoop()) {
+                                tasks[fi].stop();
+                            }
                         } else {
                             tasks[fi].start();
                         }
@@ -150,6 +156,8 @@ public class Main {
 
     private void append(final String s) throws Exception {
         if (SwingUtilities.isEventDispatchThread()) {
+            // avoid this / avoid calling this method from EDT:
+            // won't work if a modal window is in front
             area.append(s + "\n");
             area.setCaretPosition(area.getText().length());
             area.revalidate();
@@ -205,10 +213,29 @@ public class Main {
                 new WindowAdapter() {
                     @Override
                     public void windowClosing(final WindowEvent e) {
-                        startBulk(urls.getText());
+                        new Thread(() -> startBulk(urls.getText())).start();
                     }
                 });
         dialog.setVisible(true);
+    }
+
+    private void startBulk(final String urls) {
+        try {
+            Pattern pat1 = Pattern.compile(fieldReg.getText());
+            String[] lines = urls.split("\n");
+            for (String l : lines) {
+                if (l != null && !l.isBlank() && l.matches(pat1.pattern())) {
+                    Matcher mat1 = pat1.matcher(l);
+                    if (mat1.find()) {
+                        String videoId = mat1.group(1);
+                        processVideoId(videoId);
+                    }
+                }
+            }
+            tasks[1].stop();
+        } catch (Exception ex) {
+            exceptionOccurred(ex);
+        }
     }
 
     private void buttonAction2(final JFrame frame) {
@@ -249,29 +276,6 @@ public class Main {
         dialog.setVisible(true);
     }
 
-    private void startBulk(final String urls) {
-        new Thread(
-                        () -> {
-                            try {
-                                Pattern pat1 = Pattern.compile(fieldReg.getText());
-                                String[] lines = urls.split("\n");
-                                for (String l : lines) {
-                                    if (l != null && !l.isBlank() && l.matches(pat1.pattern())) {
-                                        Matcher mat1 = pat1.matcher(l);
-                                        if (mat1.find()) {
-                                            String videoId = mat1.group(1);
-                                            processVideoId(videoId);
-                                        }
-                                    }
-                                }
-                                tasks[1].stop();
-                            } catch (Exception ex) {
-                                exceptionOccurred(ex);
-                            }
-                        })
-                .start();
-    }
-
     private void processVideoId(final String videoId) throws Exception {
         append("Found video id " + videoId);
         download(videoId);
@@ -303,7 +307,7 @@ public class Main {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         append("compiler.run = " + compiler.run(null, null, null, sourceFile.getPath()));
         // Load and instantiate compiled class.
-        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {root.toURI().toURL()});
+        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
         Class<?> cls = Class.forName("AdvancedRenamer", true, classLoader);
         renameMethod = cls.getDeclaredMethod("rename", String.class);
         //  Object instance = cls.getDeclaredConstructor().newInstance();

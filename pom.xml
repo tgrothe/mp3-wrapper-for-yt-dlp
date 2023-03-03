@@ -6,7 +6,7 @@
 
     <groupId>org.example</groupId>
     <artifactId>mp3-wrapper-for-yt-dlp</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.7-2</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
