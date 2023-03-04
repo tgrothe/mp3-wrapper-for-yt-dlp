@@ -14,10 +14,13 @@ public class ControlButton {
     private final ButtonCommand[] commands;
     private ScheduledExecutorService loopExecutor;
     private Thread threadExecutor;
-    private  int index = 0;
+    private int index = 0;
 
     public ControlButton(
-            final String text1, final String text2, final boolean loop, final ButtonCommand... commands) {
+            final String text1,
+            final String text2,
+            final boolean loop,
+            final ButtonCommand... commands) {
         this.text1 = text1;
         this.text2 = text2;
         this.loop = loop;
@@ -25,7 +28,7 @@ public class ControlButton {
         this.button = new JButton(text1);
 
         for (int i = 1; i < commands.length; i++) {
-            commands[i].setPreviousCommand(commands[i-1]);
+            commands[i].setPreviousCommand(commands[i - 1]);
         }
     }
 
