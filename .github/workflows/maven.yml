@@ -10,15 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.head_ref }}
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
       - uses: dorny/paths-filter@v2
         id: changes
         with:
@@ -27,6 +18,17 @@ jobs:
               - 'pom.xml'
             src:
               - 'src/**'
+      - uses: actions/checkout@v3
+        if: steps.changes.outputs.pom == 'true' && steps.changes.outputs.src == 'true'
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Set up JDK 17
+        if: steps.changes.outputs.pom == 'true' && steps.changes.outputs.src == 'true'
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
       - uses: axel-op/googlejavaformat-action@v3
         if: steps.changes.outputs.pom == 'true' && steps.changes.outputs.src == 'true'
         with:
@@ -47,4 +49,5 @@ jobs:
           git push
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Submit Dependency Snapshot
+        if: steps.changes.outputs.pom == 'true' && steps.changes.outputs.src == 'true'
         uses: advanced-security/maven-dependency-submission-action@v3
