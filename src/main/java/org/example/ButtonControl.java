@@ -8,26 +8,32 @@ public class ButtonControl {
     private final ArrayList<ControlButton> buttons = new ArrayList<>();
 
     public JButton addButton(
-            final String text1, final String text2, final boolean loop, final Runnable... runs) {
-        ControlButton b = new ControlButton(text1, text2, loop, runs);
+            final String text1,
+            final String text2,
+            final boolean loop,
+            final ButtonCommand... commands) {
+        ControlButton b = new ControlButton(text1, text2, loop, commands);
         buttons.add(b);
         b.button.addActionListener(
-                (e) -> {
-                    boolean isRunning = b.nextClick();
-                    if (isRunning) {
-                        for (ControlButton controlButton : buttons) {
-                            if (controlButton != b) {
-                                controlButton.button.setEnabled(false);
-                            }
-                        }
-                    } else {
-                        for (ControlButton controlButton : buttons) {
-                            if (controlButton != b) {
-                                controlButton.button.setEnabled(true);
-                            }
-                        }
-                    }
-                });
+                (e) ->
+                        new Thread(
+                                        () -> {
+                                            boolean isRunning = b.nextClick();
+                                            if (isRunning) {
+                                                for (ControlButton controlButton : buttons) {
+                                                    if (controlButton != b) {
+                                                        controlButton.button.setEnabled(false);
+                                                    }
+                                                }
+                                            } else {
+                                                for (ControlButton controlButton : buttons) {
+                                                    if (controlButton != b) {
+                                                        controlButton.button.setEnabled(true);
+                                                    }
+                                                }
+                                            }
+                                        })
+                                .start());
         return b.button;
     }
 
