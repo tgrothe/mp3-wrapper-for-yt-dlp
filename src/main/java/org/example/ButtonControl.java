@@ -8,11 +8,11 @@ public class ButtonControl {
     private final ArrayList<ControlButton> buttons = new ArrayList<>();
 
     public JButton addButton(
-            final String text1, final String text2, final boolean loop, final Runnable... runs) {
-        ControlButton b = new ControlButton(text1, text2, loop, runs);
+            final String text1, final String text2, final boolean loop, final ButtonCommand... commands) {
+        ControlButton b = new ControlButton(text1, text2, loop, commands);
         buttons.add(b);
         b.button.addActionListener(
-                (e) -> {
+                (e) -> new Thread(() -> {
                     boolean isRunning = b.nextClick();
                     if (isRunning) {
                         for (ControlButton controlButton : buttons) {
@@ -27,7 +27,7 @@ public class ButtonControl {
                             }
                         }
                     }
-                });
+                }).start());
         return b.button;
     }
 

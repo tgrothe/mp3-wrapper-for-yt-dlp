@@ -3,6 +3,9 @@ package org.example;
 import io.codeworth.panelmatic.PanelBuilder;
 import io.codeworth.panelmatic.PanelMatic;
 
+import javax.swing.*;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -17,10 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.swing.*;
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
 
 public class Main {
     private final Props props = new Props();
@@ -55,24 +54,28 @@ public class Main {
         JFrame frame = new JFrame("Download, rename, copy/sync");
 
         JPanel panel = new JPanel(new FlowLayout());
-        panel.add(control.addButton("Start!", "runs...", true, this::buttonAction0));
+        panel.add(control.addButton("Start!", "runs...", true, new ButtonCommand(previousResult -> () ->{ buttonAction0(); return null;})));
         panel.add(
                 control.addButton(
                         "Bulk process",
                         "runs...",
                         false,
-                        () -> buttonAction1(frame),
-                        () -> startBulk(urlsText)));
-        panel.add(control.addButton("Settings", "runs...", false, () -> buttonAction2(frame)));
+                        new ButtonCommand(previousResult -> () -> {
+                            buttonAction1(frame);
+                            return urlsText;
+                        }),
+                        new ButtonCommand(previousResult -> () -> {
+                            startBulk((String) previousResult);
+                            return null;
+                        })));
+        panel.add(control.addButton("Settings", "runs...", false, new ButtonCommand(previousResult -> () ->{ buttonAction2(frame); return null;})));
         panel.add(
                 control.addButton(
                         "Info",
                         "runs...",
                         false,
-                        () -> {
-                            System.out.println("Hallo");
-                            // control.clickButton(3);
-                        }));
+                        new ButtonCommand(previousResult -> () ->{
+                            JOptionPane.showMessageDialog(frame, "Hallo"); control.clickButton(3);return null;})));
 
         frame.add(panel, BorderLayout.NORTH);
         frame.add(new JScrollPane(area));
