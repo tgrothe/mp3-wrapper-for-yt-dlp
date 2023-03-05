@@ -35,8 +35,8 @@ public class Main {
             new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxCopy")));
     private final JTextArea area = new JTextArea("Copy your YouTube URL to clipboard...\n\n");
     private final ButtonControl control = new ButtonControl();
-    private Method renameMethod;
-    private String urlsText;
+    private volatile Method renameMethod;
+    private volatile String urlsText;
 
     public static void exceptionOccurred(final Exception ex) {
         JOptionPane.showMessageDialog(
@@ -75,12 +75,12 @@ public class Main {
                                 previousResult ->
                                         () -> {
                                             buttonAction1(frame);
-                                            return urlsText;
+                                            return null;
                                         }),
                         new ButtonCommand(
                                 previousResult ->
                                         () -> {
-                                            startBulk((String) previousResult);
+                                            startBulk(urlsText);
                                             return null;
                                         })));
         panel.add(
