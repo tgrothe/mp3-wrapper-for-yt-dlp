@@ -27,18 +27,18 @@ public class ButtonControl {
         if (isRunning) {
             if (b == buttons.get(0)) {
                 for (ControlButton controlButton : buttons) {
-                    if ( controlButton != b) {
+                    if (controlButton != b) {
                         controlButton.button.setEnabled(false);
                     }
                 }
             } else {
                 for (ControlButton controlButton : buttons) {
-                        controlButton.button.setEnabled(false);
+                    controlButton.button.setEnabled(false);
                 }
             }
         } else {
             for (ControlButton controlButton : buttons) {
-                    controlButton.button.setEnabled(true);
+                controlButton.button.setEnabled(true);
             }
         }
     }

@@ -13,7 +13,7 @@ public class ControlButton {
     private final boolean loop;
     private final ButtonCommand[] commands;
     private ScheduledExecutorService loopExecutor;
-    private  Thread singularExecutor;
+    private Thread singularExecutor;
     private int index = 0;
 
     public ControlButton(
