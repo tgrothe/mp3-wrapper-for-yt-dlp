@@ -13,7 +13,6 @@ public class ControlButton {
     private final boolean loop;
     private final ButtonCommand[] commands;
     private ScheduledExecutorService loopExecutor;
-    private Thread threadExecutor;
     private int index = 0;
 
     public ControlButton(
@@ -32,43 +31,40 @@ public class ControlButton {
         }
     }
 
-    public synchronized boolean nextClick() {
-        try {
-            if (index < commands.length) {
-                if (loop) {
-                    if (loopExecutor != null) {
-                        loopExecutor.shutdown();
-                        //noinspection ResultOfMethodCallIgnored
-                        loopExecutor.awaitTermination(1, TimeUnit.HOURS);
-                    }
-                    loopExecutor = Executors.newSingleThreadScheduledExecutor();
-                    loopExecutor.scheduleAtFixedRate(commands[index], 0, 3, TimeUnit.SECONDS);
-                } else {
-                    if (threadExecutor != null) {
-                        threadExecutor.join();
-                    }
-                    threadExecutor = new Thread(commands[index]);
-                    threadExecutor.start();
-                }
-                index++;
-                button.setText(text2);
-                return true;
-            }
-            if (loop) {
-                loopExecutor.shutdown();
-                //noinspection ResultOfMethodCallIgnored
-                loopExecutor.awaitTermination(1, TimeUnit.HOURS);
-                loopExecutor = null;
-            } else {
-                threadExecutor.join();
-                threadExecutor = null;
-            }
-            index = 0;
-            button.setText(text1);
-            return false;
-        } catch (InterruptedException ex) {
-            Main.exceptionOccurred(ex);
-            return false;
-        }
+    public boolean nextClick() {
+        final int orgIndex = index;
+        index = (index + 1) % (commands.length + 1);
+        new Thread(
+                        () -> {
+                            try {
+                                if (orgIndex < commands.length) {
+                                    if (loop) {
+                                        if (loopExecutor != null) {
+                                            loopExecutor.shutdown();
+                                            //noinspection ResultOfMethodCallIgnored
+                                            loopExecutor.awaitTermination(1, TimeUnit.HOURS);
+                                        }
+                                        loopExecutor = Executors.newSingleThreadScheduledExecutor();
+                                        loopExecutor.scheduleAtFixedRate(
+                                                commands[orgIndex], 0, 3, TimeUnit.SECONDS);
+                                    } else {
+                                        new Thread(commands[orgIndex]).start();
+                                    }
+                                    button.setText(text2);
+                                } else {
+                                    if (loop) {
+                                        loopExecutor.shutdown();
+                                        //noinspection ResultOfMethodCallIgnored
+                                        loopExecutor.awaitTermination(1, TimeUnit.HOURS);
+                                        loopExecutor = null;
+                                    }
+                                    button.setText(text1);
+                                }
+                            } catch (InterruptedException ex) {
+                                Main.exceptionOccurred(ex);
+                            }
+                        })
+                .start();
+        return orgIndex < commands.length;
     }
 }
