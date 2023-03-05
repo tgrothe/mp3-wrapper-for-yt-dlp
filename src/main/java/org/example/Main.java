@@ -102,8 +102,10 @@ public class Main {
                         new ButtonCommand(
                                 previousResult ->
                                         () -> {
-                                            JOptionPane.showMessageDialog(frame, "A MP3 wrapper for yt-dlp written in Java\n" +
-                                                    "(for example for Windows).");
+                                            JOptionPane.showMessageDialog(
+                                                    frame,
+                                                    "A MP3 wrapper for yt-dlp written in Java\n"
+                                                            + "(for example for Windows).");
                                             control.clickButton(3);
                                             return null;
                                         })));
