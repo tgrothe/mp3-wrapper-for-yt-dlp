@@ -13,6 +13,7 @@ public class ControlButton {
     private final boolean loop;
     private final ButtonCommand[] commands;
     private ScheduledExecutorService loopExecutor;
+    private  Thread singularExecutor;
     private int index = 0;
 
     public ControlButton(
@@ -48,15 +49,26 @@ public class ControlButton {
                                         loopExecutor.scheduleAtFixedRate(
                                                 commands[orgIndex], 0, 3, TimeUnit.SECONDS);
                                     } else {
-                                        new Thread(commands[orgIndex]).start();
+                                        if (singularExecutor != null) {
+                                            singularExecutor.join();
+                                        }
+                                        singularExecutor = new Thread(commands[orgIndex]);
+                                        singularExecutor.start();
                                     }
                                     button.setText(text2);
                                 } else {
                                     if (loop) {
-                                        loopExecutor.shutdown();
-                                        //noinspection ResultOfMethodCallIgnored
-                                        loopExecutor.awaitTermination(1, TimeUnit.HOURS);
-                                        loopExecutor = null;
+                                        if (loopExecutor != null) {
+                                            loopExecutor.shutdown();
+                                            //noinspection ResultOfMethodCallIgnored
+                                            loopExecutor.awaitTermination(1, TimeUnit.HOURS);
+                                            loopExecutor = null;
+                                        }
+                                    } else {
+                                        if (singularExecutor != null) {
+                                            singularExecutor.join();
+                                            singularExecutor = null;
+                                        }
                                     }
                                     button.setText(text1);
                                 }
