@@ -19,4 +19,5 @@ A MP3 wrapper for yt-dlp written in Java (for example for Windows).
 
 ### How to contribute?
 
-- Just open a new issue with any suggestions.
+- Just open a new issue with any suggestions ...
+- Or look for open, unassigned [issues marked "good first issue" OR "help wanted"](https://github.com/tgrothe/mp3-wrapper-for-yt-dlp/issues?q=is%3Aissue+is%3Aopen+-linked%3Apr+label%3A%22good+first+issue%22%2C%22help+wanted%22). Help is greatly appreciated here. :heavy_check_mark: :wink: :+1:
