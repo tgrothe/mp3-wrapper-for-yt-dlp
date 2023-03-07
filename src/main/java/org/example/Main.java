@@ -60,55 +60,54 @@ public class Main {
                         "Start!",
                         "runs...",
                         true,
-                        new ButtonCommand(
                                 previousResult ->
                                         () -> {
                                             buttonAction0();
                                             return null;
-                                        })));
+                                        }));
         panel.add(
                 control.addButton(
                         "Bulk process",
                         "runs...",
                         false,
-                        new ButtonCommand(
                                 previousResult ->
                                         () -> {
                                             buttonAction1(frame);
                                             return null;
-                                        }),
-                        new ButtonCommand(
+                                        },
                                 previousResult ->
                                         () -> {
                                             startBulk(urlsText);
                                             return null;
-                                        })));
+                                        }));
         panel.add(
                 control.addButton(
                         "Settings",
                         "runs...",
                         false,
-                        new ButtonCommand(
                                 previousResult ->
                                         () -> {
                                             buttonAction2(frame);
                                             return null;
-                                        })));
-        panel.add(
-                control.addButton(
-                        "Info",
-                        "runs...",
-                        false,
-                        new ButtonCommand(
-                                previousResult ->
-                                        () -> {
-                                            JOptionPane.showMessageDialog(
-                                                    frame,
-                                                    "A MP3 wrapper for yt-dlp written in Java\n"
-                                                            + "(for example for Windows).");
-                                            control.clickButton(3);
-                                            return null;
-                                        })));
+                                        }));
+panel.add(
+        control.addButton(
+                "Info",
+                "runs...",
+                false,
+                previousResult -> () -> {
+                    long time1 = System.currentTimeMillis();
+                    control.clickButton(3);
+                    return time1;
+                },
+                previousResult -> () -> {
+                    long time2 = System.currentTimeMillis();
+                    System.out.println("time1 = " + previousResult);
+                    System.out.println("time2 = " + time2);
+                    JOptionPane.showMessageDialog(frame, "The time was: " + previousResult);
+                    control.clickButton(3);
+                    return null;
+                }));
 
         frame.add(panel, BorderLayout.NORTH);
         frame.add(new JScrollPane(area));
@@ -273,7 +272,7 @@ public class Main {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         append("compiler.run = " + compiler.run(null, null, null, sourceFile.getPath()));
         // Load and instantiate compiled class.
-        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {root.toURI().toURL()});
+        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
         Class<?> cls = Class.forName("AdvancedRenamer", true, classLoader);
         renameMethod = cls.getDeclaredMethod("rename", String.class);
         //  Object instance = cls.getDeclaredConstructor().newInstance();
