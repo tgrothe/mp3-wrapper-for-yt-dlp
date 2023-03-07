@@ -23,7 +23,7 @@ public class ButtonControl {
     }
 
     private synchronized void next(final ControlButton b) {
-        boolean isRunning = b.nextClick();
+        boolean isRunning = b.next();
         if (isRunning) {
             if (b == buttons.get(0)) {
                 for (ControlButton controlButton : buttons) {

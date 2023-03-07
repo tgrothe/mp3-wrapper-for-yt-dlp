@@ -32,7 +32,7 @@ public class ControlButton {
         }
     }
 
-    public boolean nextClick() {
+    public synchronized boolean next() {
         final int orgIndex = index;
         index = (index + 1) % (commands.length + 1);
         new Thread(
