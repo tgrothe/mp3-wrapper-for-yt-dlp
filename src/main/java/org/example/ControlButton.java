@@ -48,7 +48,8 @@ public class ControlButton {
                                     }
                                     if (isRunning) {
                                         loopExecutor = Executors.newSingleThreadScheduledExecutor();
-                                        loopExecutor.scheduleAtFixedRate(commands[orgIndex], 0, 3, TimeUnit.SECONDS);
+                                        loopExecutor.scheduleAtFixedRate(
+                                                commands[orgIndex], 0, 3, TimeUnit.SECONDS);
                                     }
                                 } else {
                                     if (singularExecutor != null) {
