@@ -60,54 +60,57 @@ public class Main {
                         "Start!",
                         "runs...",
                         true,
-                                previousResult ->
-                                        () -> {
-                                            buttonAction0();
-                                            return null;
-                                        }));
+                        previousResult ->
+                                () -> {
+                                    buttonAction0();
+                                    return null;
+                                }));
         panel.add(
                 control.addButton(
                         "Bulk process",
                         "runs...",
                         false,
-                                previousResult ->
-                                        () -> {
-                                            buttonAction1(frame);
-                                            return null;
-                                        },
-                                previousResult ->
-                                        () -> {
-                                            startBulk(urlsText);
-                                            return null;
-                                        }));
+                        previousResult ->
+                                () -> {
+                                    buttonAction1(frame);
+                                    return null;
+                                },
+                        previousResult ->
+                                () -> {
+                                    startBulk(urlsText);
+                                    return null;
+                                }));
         panel.add(
                 control.addButton(
                         "Settings",
                         "runs...",
                         false,
-                                previousResult ->
-                                        () -> {
-                                            buttonAction2(frame);
-                                            return null;
-                                        }));
-panel.add(
-        control.addButton(
-                "Info",
-                "runs...",
-                false,
-                previousResult -> () -> {
-                    long time1 = System.currentTimeMillis();
-                    control.clickButton(3);
-                    return time1;
-                },
-                previousResult -> () -> {
-                    long time2 = System.currentTimeMillis();
-                    System.out.println("time1 = " + previousResult);
-                    System.out.println("time2 = " + time2);
-                    JOptionPane.showMessageDialog(frame, "The time was: " + previousResult);
-                    control.clickButton(3);
-                    return null;
-                }));
+                        previousResult ->
+                                () -> {
+                                    buttonAction2(frame);
+                                    return null;
+                                }));
+        panel.add(
+                control.addButton(
+                        "Info",
+                        "runs...",
+                        false,
+                        previousResult ->
+                                () -> {
+                                    long time1 = System.currentTimeMillis();
+                                    control.clickButton(3);
+                                    return time1;
+                                },
+                        previousResult ->
+                                () -> {
+                                    long time2 = System.currentTimeMillis();
+                                    System.out.println("time1 = " + previousResult);
+                                    System.out.println("time2 = " + time2);
+                                    JOptionPane.showMessageDialog(
+                                            frame, "The time was: " + previousResult);
+                                    control.clickButton(3);
+                                    return null;
+                                }));
 
         frame.add(panel, BorderLayout.NORTH);
         frame.add(new JScrollPane(area));
@@ -272,7 +275,7 @@ panel.add(
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         append("compiler.run = " + compiler.run(null, null, null, sourceFile.getPath()));
         // Load and instantiate compiled class.
-        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
+        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {root.toURI().toURL()});
         Class<?> cls = Class.forName("AdvancedRenamer", true, classLoader);
         renameMethod = cls.getDeclaredMethod("rename", String.class);
         //  Object instance = cls.getDeclaredConstructor().newInstance();

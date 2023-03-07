@@ -44,7 +44,8 @@ public class ControlButton {
                                     }
                                     if (isRunning) {
                                         loopExecutor = Executors.newSingleThreadScheduledExecutor();
-                                        loopExecutor.scheduleAtFixedRate(runnable, 0, 3, TimeUnit.SECONDS);
+                                        loopExecutor.scheduleAtFixedRate(
+                                                runnable, 0, 3, TimeUnit.SECONDS);
                                     }
                                 } else {
                                     if (singularExecutor != null) {
@@ -56,7 +57,7 @@ public class ControlButton {
                                         singularExecutor.start();
                                     }
                                 }
-                                button.setText(isRunning  ? text2 : text1);
+                                button.setText(isRunning ? text2 : text1);
                             } catch (InterruptedException ex) {
                                 Main.exceptionOccurred(ex);
                             }
