@@ -34,49 +34,38 @@ public class ControlButton {
 
     public synchronized boolean next() {
         final int orgIndex = index;
+        final boolean isRunning = orgIndex < commands.length;
         index = (index + 1) % (commands.length + 1);
         new Thread(
                         () -> {
                             try {
-                                if (orgIndex < commands.length) {
-                                    if (loop) {
-                                        if (loopExecutor != null) {
-                                            loopExecutor.shutdown();
-                                            //noinspection ResultOfMethodCallIgnored
-                                            loopExecutor.awaitTermination(1, TimeUnit.HOURS);
-                                        }
+                                if (loop) {
+                                    if (loopExecutor != null) {
+                                        loopExecutor.shutdown();
+                                        //noinspection ResultOfMethodCallIgnored
+                                        loopExecutor.awaitTermination(1, TimeUnit.HOURS);
+                                        loopExecutor = null;
+                                    }
+                                    if (isRunning) {
                                         loopExecutor = Executors.newSingleThreadScheduledExecutor();
-                                        loopExecutor.scheduleAtFixedRate(
-                                                commands[orgIndex], 0, 3, TimeUnit.SECONDS);
-                                    } else {
-                                        if (singularExecutor != null) {
-                                            singularExecutor.join();
-                                        }
+                                        loopExecutor.scheduleAtFixedRate(commands[orgIndex], 0, 3, TimeUnit.SECONDS);
+                                    }
+                                } else {
+                                    if (singularExecutor != null) {
+                                        singularExecutor.join();
+                                        singularExecutor = null;
+                                    }
+                                    if (isRunning) {
                                         singularExecutor = new Thread(commands[orgIndex]);
                                         singularExecutor.start();
                                     }
-                                    button.setText(text2);
-                                } else {
-                                    if (loop) {
-                                        if (loopExecutor != null) {
-                                            loopExecutor.shutdown();
-                                            //noinspection ResultOfMethodCallIgnored
-                                            loopExecutor.awaitTermination(1, TimeUnit.HOURS);
-                                            loopExecutor = null;
-                                        }
-                                    } else {
-                                        if (singularExecutor != null) {
-                                            singularExecutor.join();
-                                            singularExecutor = null;
-                                        }
-                                    }
-                                    button.setText(text1);
                                 }
+                                button.setText(isRunning ? text2 : text1);
                             } catch (InterruptedException ex) {
                                 Main.exceptionOccurred(ex);
                             }
                         })
                 .start();
-        return orgIndex < commands.length;
+        return isRunning;
     }
 }
