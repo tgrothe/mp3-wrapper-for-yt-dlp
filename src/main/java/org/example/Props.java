@@ -12,7 +12,9 @@ public class Props {
     public Props() {
         try {
             if (pf.exists()) {
-                properties.load(new FileInputStream(pf));
+                try (FileInputStream fis = new FileInputStream(pf)) {
+                    properties.load(fis);
+                }
             }
             if (!properties.containsKey("fieldSrc")) {
                 properties.put("fieldSrc", "C:\\Users\\xxx\\Music\\yt-dlp\\");
