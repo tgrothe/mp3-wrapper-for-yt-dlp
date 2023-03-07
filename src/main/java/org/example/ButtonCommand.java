@@ -26,6 +26,6 @@ public class ButtonCommand implements Runnable {
     }
 
     public void setPreviousCommand(final ButtonCommand previousCommand) {
-        this.previousCommand = previousCommand;
+        this.previousCommand = new ButtonCommand(previousCommand.command);
     }
 }
