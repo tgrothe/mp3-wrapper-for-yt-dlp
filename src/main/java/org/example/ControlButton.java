@@ -1,8 +1,10 @@
 package org.example;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import javax.swing.*;
 
@@ -11,31 +13,25 @@ public class ControlButton {
     private final String text1;
     private final String text2;
     private final boolean loop;
-    private final ButtonCommand[] commands;
+    private final CommandGroup commandGroup;
     private ScheduledExecutorService loopExecutor;
     private Thread singularExecutor;
-    private int index = 0;
 
     public ControlButton(
             final String text1,
             final String text2,
             final boolean loop,
-            final ButtonCommand... commands) {
+            final Function<Object, Callable<Object>>[] commands) {
         this.text1 = text1;
         this.text2 = text2;
         this.loop = loop;
-        this.commands = commands;
+        this.commandGroup = new CommandGroup(commands);
         this.button = new JButton(text1);
-
-        for (int i = 1; i < commands.length; i++) {
-            commands[i].setPreviousCommand(commands[i - 1]);
-        }
     }
 
     public synchronized boolean next() {
-        final int orgIndex = index;
-        final boolean isRunning = orgIndex < commands.length;
-        index = (index + 1) % (commands.length + 1);
+        final Runnable runnable = commandGroup.next();
+        final boolean isRunning = commandGroup.isRunning();
         new Thread(
                         () -> {
                             try {
@@ -49,7 +45,7 @@ public class ControlButton {
                                     if (isRunning) {
                                         loopExecutor = Executors.newSingleThreadScheduledExecutor();
                                         loopExecutor.scheduleAtFixedRate(
-                                                commands[orgIndex], 0, 3, TimeUnit.SECONDS);
+                                                runnable, 0, 3, TimeUnit.SECONDS);
                                     }
                                 } else {
                                     if (singularExecutor != null) {
@@ -57,7 +53,7 @@ public class ControlButton {
                                         singularExecutor = null;
                                     }
                                     if (isRunning) {
-                                        singularExecutor = new Thread(commands[orgIndex]);
+                                        singularExecutor = new Thread(runnable);
                                         singularExecutor.start();
                                     }
                                 }

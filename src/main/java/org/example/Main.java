@@ -60,55 +60,57 @@ public class Main {
                         "Start!",
                         "runs...",
                         true,
-                        new ButtonCommand(
-                                previousResult ->
-                                        () -> {
-                                            buttonAction0();
-                                            return null;
-                                        })));
+                        previousResult ->
+                                () -> {
+                                    buttonAction0();
+                                    return null;
+                                }));
         panel.add(
                 control.addButton(
                         "Bulk process",
                         "runs...",
                         false,
-                        new ButtonCommand(
-                                previousResult ->
-                                        () -> {
-                                            buttonAction1(frame);
-                                            return null;
-                                        }),
-                        new ButtonCommand(
-                                previousResult ->
-                                        () -> {
-                                            startBulk(urlsText);
-                                            return null;
-                                        })));
+                        previousResult ->
+                                () -> {
+                                    buttonAction1(frame);
+                                    return null;
+                                },
+                        previousResult ->
+                                () -> {
+                                    startBulk(urlsText);
+                                    return null;
+                                }));
         panel.add(
                 control.addButton(
                         "Settings",
                         "runs...",
                         false,
-                        new ButtonCommand(
-                                previousResult ->
-                                        () -> {
-                                            buttonAction2(frame);
-                                            return null;
-                                        })));
+                        previousResult ->
+                                () -> {
+                                    buttonAction2(frame);
+                                    return null;
+                                }));
         panel.add(
                 control.addButton(
                         "Info",
                         "runs...",
                         false,
-                        new ButtonCommand(
-                                previousResult ->
-                                        () -> {
-                                            JOptionPane.showMessageDialog(
-                                                    frame,
-                                                    "A MP3 wrapper for yt-dlp written in Java\n"
-                                                            + "(for example for Windows).");
-                                            control.clickButton(3);
-                                            return null;
-                                        })));
+                        previousResult ->
+                                () -> {
+                                    long time1 = System.currentTimeMillis();
+                                    control.clickButton(3);
+                                    return time1;
+                                },
+                        previousResult ->
+                                () -> {
+                                    long time2 = System.currentTimeMillis();
+                                    System.out.println("time1 = " + previousResult);
+                                    System.out.println("time2 = " + time2);
+                                    JOptionPane.showMessageDialog(
+                                            frame, "The time was: " + previousResult);
+                                    control.clickButton(3);
+                                    return null;
+                                }));
 
         frame.add(panel, BorderLayout.NORTH);
         frame.add(new JScrollPane(area));

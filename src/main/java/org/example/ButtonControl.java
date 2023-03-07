@@ -1,17 +1,20 @@
 package org.example;
 
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 import javax.swing.*;
 
 public class ButtonControl {
     private final ArrayList<ControlButton> buttons = new ArrayList<>();
 
-    public JButton addButton(
+    @SafeVarargs
+    public final JButton addButton(
             final String text1,
             final String text2,
             final boolean loop,
-            final ButtonCommand... commands) {
+            final Function<Object, Callable<Object>>... commands) {
         ControlButton b = new ControlButton(text1, text2, loop, commands);
         buttons.add(b);
         b.button.addActionListener((e) -> next(b));
