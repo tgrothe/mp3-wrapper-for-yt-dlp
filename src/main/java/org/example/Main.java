@@ -106,8 +106,8 @@ public class Main {
                                 () -> {
                                     control.clickButton(3);
                                     long[] oldTimes = (long[]) previousResult;
-                                    long[] newTimes = new long[oldTimes.length+1];
-                                    System.arraycopy(oldTimes,0,newTimes,0,oldTimes.length);
+                                    long[] newTimes = new long[oldTimes.length + 1];
+                                    System.arraycopy(oldTimes, 0, newTimes, 0, oldTimes.length);
                                     newTimes[oldTimes.length] = System.currentTimeMillis();
                                     return newTimes;
                                 },
@@ -115,8 +115,8 @@ public class Main {
                                 () -> {
                                     control.clickButton(3);
                                     long[] oldTimes = (long[]) previousResult;
-                                    long[] newTimes = new long[oldTimes.length+1];
-                                    System.arraycopy(oldTimes,0,newTimes,0,oldTimes.length);
+                                    long[] newTimes = new long[oldTimes.length + 1];
+                                    System.arraycopy(oldTimes, 0, newTimes, 0, oldTimes.length);
                                     newTimes[oldTimes.length] = System.currentTimeMillis();
                                     String s = Arrays.toString(newTimes);
                                     System.out.println("newTimes = " + s);

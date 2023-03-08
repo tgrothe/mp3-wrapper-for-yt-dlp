@@ -27,25 +27,27 @@ public class ButtonControl {
     }
 
     private synchronized void nextButtonClick(final ControlButton b) {
-        new Thread(() -> {
-            final boolean isRunning = b.startNext();
-            if (isRunning) {
-                if (b == buttons.get(0)) {
-                    for (ControlButton controlButton : buttons) {
-                        if (controlButton != b) {
-                            controlButton.button.setEnabled(false);
-                        }
-                    }
-                } else {
-                    for (ControlButton controlButton : buttons) {
-                        controlButton.button.setEnabled(false);
-                    }
-                }
-            } else {
-                for (ControlButton controlButton : buttons) {
-                    controlButton.button.setEnabled(true);
-                }
-            }
-        }).start();
+        new Thread(
+                        () -> {
+                            final boolean isRunning = b.startNext();
+                            if (isRunning) {
+                                if (b == buttons.get(0)) {
+                                    for (ControlButton controlButton : buttons) {
+                                        if (controlButton != b) {
+                                            controlButton.button.setEnabled(false);
+                                        }
+                                    }
+                                } else {
+                                    for (ControlButton controlButton : buttons) {
+                                        controlButton.button.setEnabled(false);
+                                    }
+                                }
+                            } else {
+                                for (ControlButton controlButton : buttons) {
+                                    controlButton.button.setEnabled(true);
+                                }
+                            }
+                        })
+                .start();
     }
 }
