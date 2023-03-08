@@ -2,14 +2,17 @@ package org.example;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class CommandGroup {
-    private final List<Function<Object, Callable<Object>>> commands = new ArrayList<>();
+    private final  ControlButton controlButton;
+    private final List<BiFunction<ControlButton, Object, Callable<Object>>> commands = new ArrayList<>();
     private final Deque<Object> previousResults = new ArrayDeque<>();
     private int index = 0;
 
-    public CommandGroup(final Function<Object, Callable<Object>>[] commands) {
+    public CommandGroup(final ControlButton controlButton, final BiFunction<ControlButton, Object, Callable<Object>>[] commands) {
+        this.controlButton = controlButton;
         // See:
         // https://stackoverflow.com/questions/12462079/possible-heap-pollution-via-varargs-parameter
         this.commands.addAll(Arrays.asList(commands));
@@ -21,11 +24,12 @@ public class CommandGroup {
         if (fi < commands.size()) {
             return () -> {
                 try {
+                    BiFunction<ControlButton, Object, Callable<Object>> command = commands.get(fi);
                     Object previousResult;
                     if (previousResults.isEmpty()) {
-                        previousResult = commands.get(fi).apply(null).call();
+                        previousResult = command.apply(controlButton, null).call();
                     } else {
-                        previousResult = commands.get(fi).apply(previousResults.getLast()).call();
+                        previousResult = command.apply(controlButton,previousResults.getLast()).call();
                     }
                     if (previousResult != null) {
                         previousResults.add(previousResult);
