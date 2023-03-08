@@ -13,8 +13,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,10 +28,9 @@ public class Main {
     private final JTextField fieldReg = new JTextField(props.properties.getProperty("fieldReg"));
     private final JTextArea fieldReg2 = new JTextArea(props.properties.getProperty("fieldReg2"));
     private final JTextField fieldCmd = new JTextField(props.properties.getProperty("fieldCmd"));
+    private final JTextField fieldCmd2 = new JTextField(props.properties.getProperty("fieldCmd2"));
     private final JCheckBox boxRename =
             new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxRename")));
-    private final JCheckBox boxCopy =
-            new JCheckBox("", Boolean.parseBoolean(props.properties.getProperty("boxCopy")));
     private final JTextArea area = new JTextArea("Copy your YouTube URL to clipboard...\n\n");
     private final ButtonControl control = new ButtonControl();
     private volatile Method renameMethod;
@@ -79,6 +76,17 @@ public class Main {
                         (thisControlButton, previousResult) ->
                                 () -> {
                                     startBulk(thisControlButton);
+                                    return null;
+                                }));
+        panel.add(
+                control.addButton(
+                        "Convert 128k and copy/sync",
+                        "runs...",
+                        false,
+                        (thisControlButton, previousResult) ->
+                                () -> {
+                                    control.nextCommand(thisControlButton);
+                                    convertCopyFiles();
                                     return null;
                                 }));
         panel.add(
@@ -130,7 +138,7 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
-        ((JButton) panel.getComponents()[2]).doClick();
+        ((JButton) panel.getComponents()[3]).doClick();
     }
 
     private void append(final String s) throws Exception {
@@ -227,10 +235,10 @@ public class Main {
                                 .add("Source folder:", fieldSrc)
                                 .add("To copy folder:", fieldDst)
                                 .add("RegEx (do not change):", fieldReg)
-                                .add("Replace RegEx:", fieldReg2)
-                                .add("CLI Command (do not change):", fieldCmd)
+                                .add("Rename RegEx:", fieldReg2)
+                                .add("Download command (do not change):", fieldCmd)
+                                .add("Convert command (do not change):", fieldCmd2)
                                 .add("Should rename?", boxRename)
-                                .add("Should copy/sync?", boxCopy)
                                 .get());
         dialog.pack();
         dialog.setSize(dialog.getWidth() + 50, dialog.getHeight());
@@ -248,8 +256,8 @@ public class Main {
                                 fieldReg.getText(),
                                 fieldReg2.getText(),
                                 fieldCmd.getText(),
-                                boxRename.isSelected(),
-                                boxCopy.isSelected());
+                                fieldCmd2.getText(),
+                                boxRename.isSelected());
                         control.nextCommand(thisControlButton);
                     }
                 });
@@ -261,7 +269,6 @@ public class Main {
         download(videoId);
         compileRenamer();
         renameFiles();
-        copyFiles();
         append("Finish video id " + videoId);
     }
 
@@ -319,27 +326,30 @@ public class Main {
         append("Finish rename files");
     }
 
-    private void copyFiles() throws Exception {
-        if (!new File(fieldDst.getText()).exists() || !boxCopy.isSelected()) {
+    private void convertCopyFiles() throws Exception {
+        if (!new File(fieldDst.getText()).exists()) {
             return;
         }
-        append("Start copy files");
+        append("Start convert/copy files");
         File[] files = new File(fieldSrc.getText()).listFiles();
         assert files != null;
         for (File f : files) {
             String fn = f.getName();
             if (fn.endsWith(".mp3")) {
-                String prefix = fn.substring(0, fn.lastIndexOf('.'));
-                prefix = (String) renameMethod.invoke(null, prefix);
-                if (!new File(fieldDst.getText() + prefix + ".mp3").exists()) {
+                if (!new File(fieldDst.getText() + fn).exists()) {
                     String a = f.getAbsolutePath();
-                    String b = fieldDst.getText() + prefix + ".mp3";
-                    append(String.format("Copy %s to %s ...", a, b));
-                    Files.copy(Path.of(a), Path.of(b), StandardCopyOption.REPLACE_EXISTING);
+                    String b = fieldDst.getText() + fn;
+
+                    append(String.format("Start convert/copy %s to %s ...", a, b));
+                    java.lang.Runtime rt = java.lang.Runtime.getRuntime();
+                    //noinspection deprecation
+                    Process pr = rt.exec(String.format(fieldCmd2.getText(), a, b));
+                    pr.waitFor();
+                    append(String.format("Finish convert/copy %s to %s ...", a, b));
                 }
             }
         }
-        append("Finish copy files");
+        append("Finish convert/copy files");
     }
 
     public static void main(final String[] args) {

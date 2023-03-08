@@ -51,11 +51,13 @@ public class Props {
                         "fieldCmd",
                         "cmd /c start /wait powershell.exe -Command \"cd '%1$s' ; yt-dlp.exe -f bestaudio -x --audio-format mp3 --audio-quality 320K -- %2$s\"");
             }
+            if (!properties.containsKey("fieldCmd2")) {
+                properties.put(
+                        "fieldCmd2",
+                        "cmd /c start /wait powershell.exe -Command \"ffmpeg.exe -i '%1$s' -codec:a libmp3lame -b:a 128k '%2$s'\"");
+            }
             if (!properties.containsKey("boxRename")) {
                 properties.put("boxRename", "true");
-            }
-            if (!properties.containsKey("boxCopy")) {
-                properties.put("boxCopy", "true");
             }
         } catch (Exception ex) {
             Main.exceptionOccurred(ex);
@@ -68,16 +70,16 @@ public class Props {
             final String fieldReg,
             final String fieldReg2,
             final String fieldCmd,
-            final boolean boxRename,
-            final boolean boxCopy) {
+            final String fieldCmd2,
+            final boolean boxRename) {
         try {
             properties.put("fieldSrc", fieldSrc);
             properties.put("fieldDst", fieldDst);
             properties.put("fieldReg", fieldReg);
             properties.put("fieldReg2", fieldReg2);
             properties.put("fieldCmd", fieldCmd);
+            properties.put("fieldCmd2", fieldCmd2);
             properties.put("boxRename", String.valueOf(boxRename));
-            properties.put("boxCopy", String.valueOf(boxCopy));
             try (FileOutputStream fos = new FileOutputStream(pf)) {
                 properties.store(fos, "Properties for mp3-wrapper-for-yt-dlp");
             }
