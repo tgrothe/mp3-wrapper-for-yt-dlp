@@ -13,8 +13,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -345,7 +343,7 @@ public class Main {
                     append(String.format("Start convert/copy %s to %s ...", a, b));
                     java.lang.Runtime rt = java.lang.Runtime.getRuntime();
                     //noinspection deprecation
-                    Process pr = rt.exec(String.format(fieldCmd2.getText(), a,b));
+                    Process pr = rt.exec(String.format(fieldCmd2.getText(), a, b));
                     pr.waitFor();
                     append(String.format("Finish convert/copy %s to %s ...", a, b));
                 }
