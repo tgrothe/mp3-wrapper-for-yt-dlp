@@ -4,7 +4,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import javax.swing.*;
 
@@ -21,11 +21,11 @@ public class ControlButton {
             final String text1,
             final String text2,
             final boolean loop,
-            final Function<Object, Callable<Object>>[] commands) {
+            final BiFunction<ControlButton, Object, Callable<Object>>[] commands) {
         this.text1 = text1;
         this.text2 = text2;
         this.loop = loop;
-        this.commandGroup = new CommandGroup(commands);
+        this.commandGroup = new CommandGroup(this, commands);
         this.button = new JButton(text1);
     }
 

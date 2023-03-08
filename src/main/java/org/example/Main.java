@@ -61,7 +61,7 @@ public class Main {
                         "Start!",
                         "runs...",
                         true,
-                        previousResult ->
+                        (thisControlButton, previousResult) ->
                                 () -> {
                                     buttonAction0();
                                     return null;
@@ -71,14 +71,14 @@ public class Main {
                         "Bulk process",
                         "runs...",
                         false,
-                        previousResult ->
+                        (thisControlButton, previousResult) ->
                                 () -> {
-                                    buttonAction1(frame);
+                                    buttonAction1(thisControlButton, frame);
                                     return null;
                                 },
-                        previousResult ->
+                        (thisControlButton, previousResult) ->
                                 () -> {
-                                    startBulk(urlsText);
+                                    startBulk(thisControlButton);
                                     return null;
                                 }));
         panel.add(
@@ -86,9 +86,9 @@ public class Main {
                         "Settings",
                         "runs...",
                         false,
-                        previousResult ->
+                        (thisControlButton, previousResult) ->
                                 () -> {
-                                    buttonAction2(frame);
+                                    buttonAction2(thisControlButton, frame);
                                     return null;
                                 }));
         panel.add(
@@ -96,30 +96,30 @@ public class Main {
                         "Test",
                         "runs...",
                         false,
-                        previousResult ->
+                        (thisControlButton, previousResult) ->
                                 () -> {
-                                    control.clickButton(3);
+                                    control.nextCommand(thisControlButton);
                                     long time = System.currentTimeMillis();
                                     return new long[] {time};
                                 },
-                        previousResult ->
+                        (thisControlButton, previousResult) ->
                                 () -> {
-                                    control.clickButton(3);
+                                    control.nextCommand(thisControlButton);
                                     long[] oldTimes = (long[]) previousResult;
                                     long[] newTimes = new long[oldTimes.length + 1];
                                     System.arraycopy(oldTimes, 0, newTimes, 0, oldTimes.length);
                                     newTimes[oldTimes.length] = System.currentTimeMillis();
                                     return newTimes;
                                 },
-                        previousResult ->
+                        (thisControlButton, previousResult) ->
                                 () -> {
-                                    control.clickButton(3);
+                                    control.nextCommand(thisControlButton);
                                     long[] oldTimes = (long[]) previousResult;
                                     long[] newTimes = new long[oldTimes.length + 1];
                                     System.arraycopy(oldTimes, 0, newTimes, 0, oldTimes.length);
                                     newTimes[oldTimes.length] = System.currentTimeMillis();
                                     String s = Arrays.toString(newTimes);
-                                    System.out.println("newTimes = " + s);
+                                    append("newTimes = " + s);
                                     JOptionPane.showMessageDialog(frame, "The time was: " + s);
                                     return null;
                                 }));
@@ -130,7 +130,7 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
-        control.clickButton(2);
+        ((JButton) panel.getComponents()[2]).doClick();
     }
 
     private void append(final String s) throws Exception {
@@ -175,7 +175,7 @@ public class Main {
     /*
     Naming: Please see here: https://english.stackexchange.com/questions/141884/which-is-a-better-and-commonly-used-word-bulk-or-batch
      */
-    private void buttonAction1(final JFrame frame) {
+    private void buttonAction1(final ControlButton thisControlButton, final JFrame frame) {
         final JTextArea urls = new JTextArea();
         urls.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         final JDialog dialog = new JDialog(frame, "Bulk processing", true);
@@ -193,16 +193,16 @@ public class Main {
                     @Override
                     public void windowClosing(final WindowEvent e) {
                         urlsText = urls.getText();
-                        control.clickButton(1);
+                        control.nextCommand(thisControlButton);
                     }
                 });
         dialog.setVisible(true);
     }
 
-    private void startBulk(final String urls) {
+    private void startBulk(final ControlButton thisControlButton) {
         try {
             Pattern pat1 = Pattern.compile(fieldReg.getText());
-            String[] lines = urls.split("\n");
+            String[] lines = urlsText.split("\n");
             for (String l : lines) {
                 if (l != null && !l.isBlank() && l.matches(pat1.pattern())) {
                     Matcher mat1 = pat1.matcher(l);
@@ -212,13 +212,13 @@ public class Main {
                     }
                 }
             }
-            control.clickButton(1);
+            control.nextCommand(thisControlButton);
         } catch (Exception ex) {
             exceptionOccurred(ex);
         }
     }
 
-    private void buttonAction2(final JFrame frame) {
+    private void buttonAction2(final ControlButton thisControlButton, final JFrame frame) {
         final JDialog dialog = new JDialog(frame, "Customization", true);
         dialog.getContentPane()
                 .add(
@@ -250,7 +250,7 @@ public class Main {
                                 fieldCmd.getText(),
                                 boxRename.isSelected(),
                                 boxCopy.isSelected());
-                        control.clickButton(2);
+                        control.nextCommand(thisControlButton);
                     }
                 });
         dialog.setVisible(true);
