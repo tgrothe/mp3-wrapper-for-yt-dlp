@@ -130,7 +130,7 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
-        ((JButton)panel.getComponents()[2]).doClick();
+        ((JButton) panel.getComponents()[2]).doClick();
     }
 
     private void append(final String s) throws Exception {
