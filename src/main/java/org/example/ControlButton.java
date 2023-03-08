@@ -29,40 +29,35 @@ public class ControlButton {
         this.button = new JButton(text1);
     }
 
-    public synchronized boolean next() {
-        final Runnable runnable = commandGroup.next();
+    public synchronized boolean startNext() {
+        final Runnable runnable = commandGroup.getNextRunnable();
         final boolean isRunning = commandGroup.isRunning();
-        new Thread(
-                        () -> {
-                            try {
-                                if (loop) {
-                                    if (loopExecutor != null) {
-                                        loopExecutor.shutdown();
-                                        //noinspection ResultOfMethodCallIgnored
-                                        loopExecutor.awaitTermination(1, TimeUnit.HOURS);
-                                        loopExecutor = null;
-                                    }
-                                    if (isRunning) {
-                                        loopExecutor = Executors.newSingleThreadScheduledExecutor();
-                                        loopExecutor.scheduleAtFixedRate(
-                                                runnable, 0, 3, TimeUnit.SECONDS);
-                                    }
-                                } else {
-                                    if (singularExecutor != null) {
-                                        singularExecutor.join();
-                                        singularExecutor = null;
-                                    }
-                                    if (isRunning) {
-                                        singularExecutor = new Thread(runnable);
-                                        singularExecutor.start();
-                                    }
-                                }
-                                button.setText(isRunning ? text2 : text1);
-                            } catch (InterruptedException ex) {
-                                Main.exceptionOccurred(ex);
-                            }
-                        })
-                .start();
+        try {
+            if (loop) {
+                if (loopExecutor != null) {
+                    loopExecutor.shutdown();
+                    //noinspection ResultOfMethodCallIgnored
+                    loopExecutor.awaitTermination(1, TimeUnit.HOURS);
+                    loopExecutor = null;
+                }
+                if (isRunning) {
+                    loopExecutor = Executors.newSingleThreadScheduledExecutor();
+                    loopExecutor.scheduleAtFixedRate(runnable, 0, 3, TimeUnit.SECONDS);
+                }
+            } else {
+                if (singularExecutor != null) {
+                    singularExecutor.join();
+                    singularExecutor = null;
+                }
+                if (isRunning) {
+                    singularExecutor = new Thread(runnable);
+                    singularExecutor.start();
+                }
+            }
+            button.setText(isRunning ? text2 : text1);
+        } catch (InterruptedException ex) {
+            Main.exceptionOccurred(ex);
+        }
         return isRunning;
     }
 }

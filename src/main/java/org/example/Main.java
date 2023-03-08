@@ -15,6 +15,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,23 +93,34 @@ public class Main {
                                 }));
         panel.add(
                 control.addButton(
-                        "Info",
+                        "Test",
                         "runs...",
                         false,
                         previousResult ->
                                 () -> {
-                                    long time1 = System.currentTimeMillis();
                                     control.clickButton(3);
-                                    return time1;
+                                    long time = System.currentTimeMillis();
+                                    return new long[] {time};
                                 },
                         previousResult ->
                                 () -> {
-                                    long time2 = System.currentTimeMillis();
-                                    System.out.println("time1 = " + previousResult);
-                                    System.out.println("time2 = " + time2);
-                                    JOptionPane.showMessageDialog(
-                                            frame, "The time was: " + previousResult);
                                     control.clickButton(3);
+                                    long[] oldTimes = (long[]) previousResult;
+                                    long[] newTimes = new long[oldTimes.length + 1];
+                                    System.arraycopy(oldTimes, 0, newTimes, 0, oldTimes.length);
+                                    newTimes[oldTimes.length] = System.currentTimeMillis();
+                                    return newTimes;
+                                },
+                        previousResult ->
+                                () -> {
+                                    control.clickButton(3);
+                                    long[] oldTimes = (long[]) previousResult;
+                                    long[] newTimes = new long[oldTimes.length + 1];
+                                    System.arraycopy(oldTimes, 0, newTimes, 0, oldTimes.length);
+                                    newTimes[oldTimes.length] = System.currentTimeMillis();
+                                    String s = Arrays.toString(newTimes);
+                                    System.out.println("newTimes = " + s);
+                                    JOptionPane.showMessageDialog(frame, "The time was: " + s);
                                     return null;
                                 }));
 

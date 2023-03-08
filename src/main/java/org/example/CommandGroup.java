@@ -15,7 +15,7 @@ public class CommandGroup {
         this.commands.addAll(Arrays.asList(commands));
     }
 
-    public Runnable next() {
+    public Runnable getNextRunnable() {
         final int fi = index;
         index = (index + 1) % (commands.size() + 1);
         if (fi < commands.size()) {
