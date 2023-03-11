@@ -53,79 +53,79 @@ public class Main {
         JFrame frame = new JFrame("Download, rename, copy/sync");
 
         JButton[] jbs = {
-                control.addButton(
-                        "Start!",
-                        "runs...",
-                        true,
-                        (thisControlButton, previousResult) ->
-                                () -> {
-                                    buttonAction0();
-                                    return null;
-                                }),
-                control.addButton(
-                        "Bulk process",
-                        "runs...",
-                        false,
-                        (thisControlButton, previousResult) ->
-                                () -> {
-                                    buttonAction1(thisControlButton, frame);
-                                    return null;
-                                },
-                        (thisControlButton, previousResult) ->
-                                () -> {
-                                    startBulk(thisControlButton);
-                                    return null;
-                                }),
-                control.addButton(
-                        "Convert 128k and copy/sync",
-                        "runs...",
-                        false,
-                        (thisControlButton, previousResult) ->
-                                () -> {
-                                    control.nextCommand(thisControlButton);
-                                    convertCopyFiles();
-                                    return null;
-                                }),
-                control.addButton(
-                        "Settings",
-                        "runs...",
-                        false,
-                        (thisControlButton, previousResult) ->
-                                () -> {
-                                    buttonAction2(thisControlButton, frame);
-                                    return null;
-                                }),
-                control.addButton(
-                        "Test",
-                        "runs...",
-                        false,
-                        (thisControlButton, previousResult) ->
-                                () -> {
-                                    control.nextCommand(thisControlButton);
-                                    long time = System.currentTimeMillis();
-                                    return new long[]{time};
-                                },
-                        (thisControlButton, previousResult) ->
-                                () -> {
-                                    control.nextCommand(thisControlButton);
-                                    long[] oldTimes = (long[]) previousResult;
-                                    long[] newTimes = new long[oldTimes.length + 1];
-                                    System.arraycopy(oldTimes, 0, newTimes, 0, oldTimes.length);
-                                    newTimes[oldTimes.length] = System.currentTimeMillis();
-                                    return newTimes;
-                                },
-                        (thisControlButton, previousResult) ->
-                                () -> {
-                                    control.nextCommand(thisControlButton);
-                                    long[] oldTimes = (long[]) previousResult;
-                                    long[] newTimes = new long[oldTimes.length + 1];
-                                    System.arraycopy(oldTimes, 0, newTimes, 0, oldTimes.length);
-                                    newTimes[oldTimes.length] = System.currentTimeMillis();
-                                    String s = Arrays.toString(newTimes);
-                                    append("newTimes = " + s);
-                                    JOptionPane.showMessageDialog(frame, "The time was: " + s);
-                                    return null;
-                                }),
+            control.addButton(
+                    "Start!",
+                    "runs...",
+                    true,
+                    (thisControlButton, previousResult) ->
+                            () -> {
+                                buttonAction0();
+                                return null;
+                            }),
+            control.addButton(
+                    "Bulk process",
+                    "runs...",
+                    false,
+                    (thisControlButton, previousResult) ->
+                            () -> {
+                                buttonAction1(thisControlButton, frame);
+                                return null;
+                            },
+                    (thisControlButton, previousResult) ->
+                            () -> {
+                                startBulk(thisControlButton);
+                                return null;
+                            }),
+            control.addButton(
+                    "Convert 128k and copy/sync",
+                    "runs...",
+                    false,
+                    (thisControlButton, previousResult) ->
+                            () -> {
+                                control.nextCommand(thisControlButton);
+                                convertCopyFiles();
+                                return null;
+                            }),
+            control.addButton(
+                    "Settings",
+                    "runs...",
+                    false,
+                    (thisControlButton, previousResult) ->
+                            () -> {
+                                buttonAction2(thisControlButton, frame);
+                                return null;
+                            }),
+            control.addButton(
+                    "Test",
+                    "runs...",
+                    false,
+                    (thisControlButton, previousResult) ->
+                            () -> {
+                                control.nextCommand(thisControlButton);
+                                long time = System.currentTimeMillis();
+                                return new long[] {time};
+                            },
+                    (thisControlButton, previousResult) ->
+                            () -> {
+                                control.nextCommand(thisControlButton);
+                                long[] oldTimes = (long[]) previousResult;
+                                long[] newTimes = new long[oldTimes.length + 1];
+                                System.arraycopy(oldTimes, 0, newTimes, 0, oldTimes.length);
+                                newTimes[oldTimes.length] = System.currentTimeMillis();
+                                return newTimes;
+                            },
+                    (thisControlButton, previousResult) ->
+                            () -> {
+                                control.nextCommand(thisControlButton);
+                                long[] oldTimes = (long[]) previousResult;
+                                long[] newTimes = new long[oldTimes.length + 1];
+                                System.arraycopy(oldTimes, 0, newTimes, 0, oldTimes.length);
+                                newTimes[oldTimes.length] = System.currentTimeMillis();
+                                String s = Arrays.toString(newTimes);
+                                append("newTimes = " + s);
+                                JOptionPane.showMessageDialog(frame, "The time was: " + s);
+                                return null;
+                            }),
         };
 
         JPanel innerPanel = new JPanel(new GridLayout(1, jbs.length));
