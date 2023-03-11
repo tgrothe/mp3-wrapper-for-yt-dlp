@@ -52,8 +52,7 @@ public class Main {
 
         JFrame frame = new JFrame("Download, rename, copy/sync");
 
-        JPanel panel = new JPanel(new FlowLayout());
-        panel.add(
+        JButton[] jbs = {
                 control.addButton(
                         "Start!",
                         "runs...",
@@ -62,8 +61,7 @@ public class Main {
                                 () -> {
                                     buttonAction0();
                                     return null;
-                                }));
-        panel.add(
+                                }),
                 control.addButton(
                         "Bulk process",
                         "runs...",
@@ -77,8 +75,7 @@ public class Main {
                                 () -> {
                                     startBulk(thisControlButton);
                                     return null;
-                                }));
-        panel.add(
+                                }),
                 control.addButton(
                         "Convert 128k and copy/sync",
                         "runs...",
@@ -88,8 +85,7 @@ public class Main {
                                     control.nextCommand(thisControlButton);
                                     convertCopyFiles();
                                     return null;
-                                }));
-        panel.add(
+                                }),
                 control.addButton(
                         "Settings",
                         "runs...",
@@ -98,8 +94,7 @@ public class Main {
                                 () -> {
                                     buttonAction2(thisControlButton, frame);
                                     return null;
-                                }));
-        panel.add(
+                                }),
                 control.addButton(
                         "Test",
                         "runs...",
@@ -108,7 +103,7 @@ public class Main {
                                 () -> {
                                     control.nextCommand(thisControlButton);
                                     long time = System.currentTimeMillis();
-                                    return new long[] {time};
+                                    return new long[]{time};
                                 },
                         (thisControlButton, previousResult) ->
                                 () -> {
@@ -130,15 +125,30 @@ public class Main {
                                     append("newTimes = " + s);
                                     JOptionPane.showMessageDialog(frame, "The time was: " + s);
                                     return null;
-                                }));
+                                }),
+        };
+
+        JPanel innerPanel = new JPanel(new GridLayout(1, jbs.length));
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.anchor = GridBagConstraints.LINE_START;
+        constraints.weightx = 0.5;
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.add(innerPanel, constraints);
+
+        for (JButton b : jbs) {
+            // b.setFont(b.getFont().deriveFont(Font.PLAIN));
+            innerPanel.add(b);
+        }
 
         frame.add(panel, BorderLayout.NORTH);
         frame.add(new JScrollPane(area));
-        frame.setSize(800, 600);
+        frame.setSize(1200, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
-        ((JButton) panel.getComponents()[3]).doClick();
+        jbs[3].doClick();
     }
 
     private void append(final String s) throws Exception {
